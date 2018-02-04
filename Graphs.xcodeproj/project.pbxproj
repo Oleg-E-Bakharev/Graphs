@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C7E4AA420277D9700347B53 /* sparseArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7E4AA320277D9700347B53 /* sparseArray.cpp */; };
 		7C9B42221E9ADD7100B2D9B1 /* maxFlowTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9B42201E9ADD7100B2D9B1 /* maxFlowTest.cpp */; };
 		C32F2A8D1E843F89002745BA /* spAlltest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C32F2A8C1E843F89002745BA /* spAlltest.cpp */; };
 		C349526D1CB5645900775030 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C349526C1CB5645900775030 /* main.cpp */; };
@@ -27,6 +28,8 @@
 
 /* Begin PBXFileReference section */
 		7C791DAF1CBB00AE005300DC /* searchGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchGraph.h; sourceTree = "<group>"; };
+		7C7E4AA220277D9700347B53 /* sparseArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sparseArray.hpp; sourceTree = "<group>"; };
+		7C7E4AA320277D9700347B53 /* sparseArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sparseArray.cpp; sourceTree = "<group>"; };
 		7C9B42201E9ADD7100B2D9B1 /* maxFlowTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = maxFlowTest.cpp; sourceTree = "<group>"; };
 		7C9B42211E9ADD7100B2D9B1 /* maxFlow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maxFlow.h; sourceTree = "<group>"; };
 		C30CC58B1CCA75DF003E7B6E /* dag.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dag.h; sourceTree = "<group>"; };
@@ -83,6 +86,8 @@
 			children = (
 				C30CC58D1CCBDF3E003E7B6E /* debug.h */,
 				C34952781CB7BC7600775030 /* for_iter.h */,
+				7C7E4AA220277D9700347B53 /* sparseArray.hpp */,
+				7C7E4AA320277D9700347B53 /* sparseArray.cpp */,
 				C34952751CB6BBC100775030 /* matrix.h */,
 				C34952731CB564B000775030 /* graphBase.h */,
 				C34952761CB6BBF700775030 /* denseGraph.h */,
@@ -166,6 +171,7 @@
 				C3EF88091E8EC7D6007146B5 /* spAllDagTest.cpp in Sources */,
 				C32F2A8D1E843F89002745BA /* spAlltest.cpp in Sources */,
 				7C9B42221E9ADD7100B2D9B1 /* maxFlowTest.cpp in Sources */,
+				7C7E4AA420277D9700347B53 /* sparseArray.cpp in Sources */,
 				C349526D1CB5645900775030 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

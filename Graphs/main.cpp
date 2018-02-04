@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include "sparseArray.hpp"
 #include "denseGraph.h"
 #include "sparseGraph.h"
 #include "graphGen.h"
@@ -379,6 +380,7 @@ void test_k_neighbourGraph() {
 
 int main(int argc, const char * argv[]) {
 //    testBrisgesJoints();
+    testSparseArray();
     testGraphs();
 //	testDirGraphs();
 //    test_k_neighbourGraph();
