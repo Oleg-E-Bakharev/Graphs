@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C9B42221E9ADD7100B2D9B1 /* maxFlowTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9B42201E9ADD7100B2D9B1 /* maxFlowTest.cpp */; };
+		C32F2A8D1E843F89002745BA /* spAlltest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C32F2A8C1E843F89002745BA /* spAlltest.cpp */; };
 		C349526D1CB5645900775030 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C349526C1CB5645900775030 /* main.cpp */; };
+		C3EF88091E8EC7D6007146B5 /* spAllDagTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3EF88081E8EC7D6007146B5 /* spAllDagTest.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +26,29 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7C791DAF1CBB00AE005300DC /* searchGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchGraph.h; sourceTree = "<group>"; };
+		7C9B42201E9ADD7100B2D9B1 /* maxFlowTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = maxFlowTest.cpp; sourceTree = "<group>"; };
+		7C9B42211E9ADD7100B2D9B1 /* maxFlow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maxFlow.h; sourceTree = "<group>"; };
+		C30CC58B1CCA75DF003E7B6E /* dag.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dag.h; sourceTree = "<group>"; };
+		C30CC58C1CCBC51A003E7B6E /* strongComponents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = strongComponents.h; sourceTree = "<group>"; };
+		C30CC58D1CCBDF3E003E7B6E /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		C310A22A1CBD52D10063657F /* graphGen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = graphGen.h; sourceTree = "<group>"; };
+		C31A17FF1E6EF71400F2FDE2 /* mst.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mst.h; sourceTree = "<group>"; };
+		C31A18001E72F25200F2FDE2 /* spt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spt.h; sourceTree = "<group>"; };
+		C32F2A8C1E843F89002745BA /* spAlltest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spAlltest.cpp; sourceTree = "<group>"; };
+		C3329AE11E7AB8F600FB60DF /* disjointSet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = disjointSet.h; sourceTree = "<group>"; };
 		C34952691CB5645900775030 /* Graphs */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Graphs; sourceTree = BUILT_PRODUCTS_DIR; };
 		C349526C1CB5645900775030 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		C34952731CB564B000775030 /* graphBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = graphBase.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		C34952751CB6BBC100775030 /* matrix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matrix.h; sourceTree = "<group>"; };
+		C34952761CB6BBF700775030 /* denseGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = denseGraph.h; sourceTree = "<group>"; };
+		C34952781CB7BC7600775030 /* for_iter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = for_iter.h; sourceTree = "<group>"; };
+		C34952791CB7EE0600775030 /* sparseGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sparseGraph.h; sourceTree = "<group>"; };
+		C350F2AF1E81933B00364F39 /* spAll.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spAll.h; sourceTree = "<group>"; };
+		C36704C41CC1677900EC1DD9 /* directedGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = directedGraph.h; sourceTree = "<group>"; };
+		C3EF88071E8EC7B3007146B5 /* spAllDag.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spAllDag.h; sourceTree = "<group>"; };
+		C3EF88081E8EC7D6007146B5 /* spAllDagTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spAllDagTest.cpp; sourceTree = "<group>"; };
+		C3F74B171E6878C9008F51A2 /* weightedGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = weightedGraph.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +81,27 @@
 		C349526B1CB5645900775030 /* Graphs */ = {
 			isa = PBXGroup;
 			children = (
+				C30CC58D1CCBDF3E003E7B6E /* debug.h */,
+				C34952781CB7BC7600775030 /* for_iter.h */,
+				C34952751CB6BBC100775030 /* matrix.h */,
+				C34952731CB564B000775030 /* graphBase.h */,
+				C34952761CB6BBF700775030 /* denseGraph.h */,
+				C34952791CB7EE0600775030 /* sparseGraph.h */,
+				C310A22A1CBD52D10063657F /* graphGen.h */,
+				7C791DAF1CBB00AE005300DC /* searchGraph.h */,
+				C36704C41CC1677900EC1DD9 /* directedGraph.h */,
+				C30CC58C1CCBC51A003E7B6E /* strongComponents.h */,
+				C30CC58B1CCA75DF003E7B6E /* dag.h */,
+				C3F74B171E6878C9008F51A2 /* weightedGraph.h */,
+				C3329AE11E7AB8F600FB60DF /* disjointSet.h */,
+				C31A17FF1E6EF71400F2FDE2 /* mst.h */,
+				C31A18001E72F25200F2FDE2 /* spt.h */,
+				C350F2AF1E81933B00364F39 /* spAll.h */,
+				C32F2A8C1E843F89002745BA /* spAlltest.cpp */,
+				C3EF88071E8EC7B3007146B5 /* spAllDag.h */,
+				C3EF88081E8EC7D6007146B5 /* spAllDagTest.cpp */,
+				7C9B42211E9ADD7100B2D9B1 /* maxFlow.h */,
+				7C9B42201E9ADD7100B2D9B1 /* maxFlowTest.cpp */,
 				C349526C1CB5645900775030 /* main.cpp */,
 			);
 			path = Graphs;
@@ -88,7 +133,7 @@
 		C34952611CB5645900775030 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "Oleg Bakharev";
 				TargetAttributes = {
 					C34952681CB5645900775030 = {
@@ -118,6 +163,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3EF88091E8EC7D6007146B5 /* spAllDagTest.cpp in Sources */,
+				C32F2A8D1E843F89002745BA /* spAlltest.cpp in Sources */,
+				7C9B42221E9ADD7100B2D9B1 /* maxFlowTest.cpp in Sources */,
 				C349526D1CB5645900775030 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -139,8 +187,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -183,8 +233,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -216,6 +268,7 @@
 		C34952721CB5645900775030 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -239,6 +292,7 @@
 				C34952721CB5645900775030 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
