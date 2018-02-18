@@ -26,10 +26,7 @@ void testSparseArray()
     
     ha['Z'] = 10;
 	
-    cout << "Count:" << ha.size() << " Output: {char:count}\n";
-	for (auto it : ha) {
-		cout << it << ", ";
-	}
+    cout << ha;
 
 	cout << "\nMediane: " << *(ha.begin() + ha.size() / 2) << "\n";
 }

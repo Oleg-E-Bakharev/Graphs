@@ -8,6 +8,8 @@
 #include <vector>
 #include <initializer_list>
 #include <assert.h>
+#include <algorithm>
+#include <functional>
 
 // Разреженный массив на основе хэш таблицы с открытой адресацией.
 // Можно использовать как будто массив изначально заполнен значениями по умолчанию для хранимого типа,
@@ -57,11 +59,9 @@ template <typename T> class SparseArray {
         size_t tableSize_(size_t itemsCount) const {
             if (itemsCount <= 32) return 31;
             // Вычисляем log2(itemsCount) для этого находим старший ненулевой разряд.
-            size_t i = (sizeof(itemsCount) << 3) - 1;
-            for (; i > 0; i--) {
-                if ((itemsCount >> i & 1) != 0) break;
-            }
-            assert(i > 5 && i < 32);
+            size_t i = 6;
+            while (itemsCount >> i != 0) i++;
+            assert(i < 32);
             // Массив чисел, вычитание которых из степени 2 (начиная с 6) даёт простое число.
             // Взято из Седжвика "Алгоритмы на Java" табл. 3.4.2
             static size_t Deltas[] = {3, 1, 5, 3, 3, 9, 3, 1, 3, 19, 15, 1, 5, 1, 3, 9, 3, 15, 3, 39, 5, 39, 57, 3, 35, 1};
@@ -99,6 +99,7 @@ template <typename T> class SparseArray {
         size_t size() const { return _refs.size(); }
         
         // Кладёт значение. Возвращает true если буфер пора увеличивать.
+        // Буфер увеличивается только при занесении нового значения. При запросе - буфер не увеличивается!
         bool put(size_t pos, const T& t) {
             size_t i = hash_(pos);
             for ( ; _status[i]; i = (i + 1) % _data.size()) {
@@ -115,14 +116,12 @@ template <typename T> class SparseArray {
             return  (_refs.size() >= _data.size() >> 1);
         }
         
-        Item& get(size_t pos, bool& shouldGrow) {
-            shouldGrow = false;
+        Item get(size_t pos) {
             for (size_t i = hash_(pos); _status[i]; i = (i + 1) % _data.size()) {
                 if (_data[i].first == pos) return _data[i];
             }
-            // Создаём пустой элемент и возвращаем его.
-            shouldGrow = put(pos, T());
-            return _refs.back();
+            // Возвращаем фейковый пустой элемент.
+            return {pos, T()};
         }
         
         using iterator = typename References::iterator;
@@ -139,8 +138,8 @@ template <typename T> class SparseArray {
         
         // Возвращает заполненный своей копией буфер с вдвое увеличенным размером.
         Data grow() {
-            Data data(_data.size() << 1);
-            // В данном случае нам не важен порядок ссылок, по-этому не вызываем fix_()
+            Data data(_data.size());
+            // В данном случае нам не важен порядок ссылок, поэтому не вызываем fix_()
             for (auto i = _refs.begin(); i != _refs.end(); ++i) {
                 Item& item = *i;
                 data.put(item.first, item.second);
@@ -159,24 +158,40 @@ template <typename T> class SparseArray {
         
         Reference (SparseArray& parent, size_t pos)  : _parent(parent), _pos(pos) {}
         
-    public:
-        operator T&() {
-            bool shouldGrow = false;
-            Item& ptr = _parent._data.get(_pos, shouldGrow);
-            if (shouldGrow) {
-                _parent._data = std::move(_parent._data.grow());
-                ptr = _parent._data.get(_pos, shouldGrow);
-                assert(!shouldGrow);
-            }
-            return ptr.second;
-        }
-        
-        void operator=(const T& value) {
+        void assign_(const T& value) {
             if (_parent._data.put(_pos, value)) {
                 // Здесь произойдёт не копирование (оно запрещено) а перемещение.
                 _parent._data = _parent._data.grow();
             }
         }
+        
+    public:
+        operator T() const { return _parent._data.get(_pos).second; }
+        
+        // Для примера реализуем самые частоиспользуемые операторы.
+        Reference& operator++() {
+            assign_(_parent._data.get(_pos).second + 1);
+            return *this;
+        }
+        
+        T operator++(int) {
+            T t = _parent._data.get(_pos).second;
+            assign_(t + 1);
+            return t;
+        }
+        
+        Reference& operator--() {
+            assign_(_parent._data.get(_pos).second - 1);
+            return *this;
+        }
+        
+        T operator--(int) {
+            T t = _parent._data.get(_pos).second;
+            assign_(t - 1);
+            return t;
+        }
+
+        void operator=(const T& value) { assign_(value); }
     };
 
 	// Итератор с произвольным доступом.
@@ -186,7 +201,7 @@ template <typename T> class SparseArray {
 		Iterator(const Pos& pos) : _pos(pos) {}
 		friend class SparseArray;
 	public:
-		Item& operator*() const {return *_pos;}
+		Item& operator*() const {return _pos->get();}
 		Item* operator->() const {return _pos;}
 		void operator++() { ++_pos; }
 		bool operator!=(const Iterator& it) const { return _pos != it._pos; }
@@ -197,8 +212,9 @@ public:
     using value_type = Item;
 	using iterator = Iterator;
 	using reference = Reference;
+    using const_reference = Reference;
 
-	SparseArray(size_t size = 0) : _data(size) {}
+	SparseArray(size_t size = 0) : _data(0) {} // Не инициализируем хранилище реальным размером.
 	
 	// Количество используемых элементов.
     size_t size() const { return _data.size(); }
@@ -211,6 +227,14 @@ public:
 	
 	// Конечный итератор.
     iterator end() { return _data.end(); }
+    
+    friend std::ostream& operator<< (std::ostream& os, const SparseArray<T>& sa) {
+        os << "Count:" << sa.size() << " Output: {char:count}\n";
+        for (auto& it : const_cast<SparseArray<T>&>(sa)) {
+            os << it << ", ";
+        }
+        return os;
+    }
 };
 
 void testSparseArray();

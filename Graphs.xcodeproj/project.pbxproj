@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C692C0D2027CF8500529D85 /* sparseMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C692C0B2027CF8500529D85 /* sparseMatrix.cpp */; };
 		7C7E4AA420277D9700347B53 /* sparseArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7E4AA320277D9700347B53 /* sparseArray.cpp */; };
 		7C9B42221E9ADD7100B2D9B1 /* maxFlowTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9B42201E9ADD7100B2D9B1 /* maxFlowTest.cpp */; };
 		C32F2A8D1E843F89002745BA /* spAlltest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C32F2A8C1E843F89002745BA /* spAlltest.cpp */; };
@@ -27,6 +28,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7C692C0B2027CF8500529D85 /* sparseMatrix.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sparseMatrix.cpp; sourceTree = "<group>"; };
+		7C692C0C2027CF8500529D85 /* sparseMatrix.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sparseMatrix.hpp; sourceTree = "<group>"; };
 		7C791DAF1CBB00AE005300DC /* searchGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchGraph.h; sourceTree = "<group>"; };
 		7C7E4AA220277D9700347B53 /* sparseArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sparseArray.hpp; sourceTree = "<group>"; };
 		7C7E4AA320277D9700347B53 /* sparseArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sparseArray.cpp; sourceTree = "<group>"; };
@@ -40,6 +43,7 @@
 		C31A18001E72F25200F2FDE2 /* spt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spt.h; sourceTree = "<group>"; };
 		C32F2A8C1E843F89002745BA /* spAlltest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spAlltest.cpp; sourceTree = "<group>"; };
 		C3329AE11E7AB8F600FB60DF /* disjointSet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = disjointSet.h; sourceTree = "<group>"; };
+		C33D5C1620336D8C00FBFB9C /* smartGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = smartGraph.h; sourceTree = "<group>"; };
 		C34952691CB5645900775030 /* Graphs */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Graphs; sourceTree = BUILT_PRODUCTS_DIR; };
 		C349526C1CB5645900775030 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C34952731CB564B000775030 /* graphBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = graphBase.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -89,9 +93,12 @@
 				7C7E4AA220277D9700347B53 /* sparseArray.hpp */,
 				7C7E4AA320277D9700347B53 /* sparseArray.cpp */,
 				C34952751CB6BBC100775030 /* matrix.h */,
+				7C692C0C2027CF8500529D85 /* sparseMatrix.hpp */,
+				7C692C0B2027CF8500529D85 /* sparseMatrix.cpp */,
 				C34952731CB564B000775030 /* graphBase.h */,
 				C34952761CB6BBF700775030 /* denseGraph.h */,
 				C34952791CB7EE0600775030 /* sparseGraph.h */,
+				C33D5C1620336D8C00FBFB9C /* smartGraph.h */,
 				C310A22A1CBD52D10063657F /* graphGen.h */,
 				7C791DAF1CBB00AE005300DC /* searchGraph.h */,
 				C36704C41CC1677900EC1DD9 /* directedGraph.h */,
@@ -170,6 +177,7 @@
 			files = (
 				C3EF88091E8EC7D6007146B5 /* spAllDagTest.cpp in Sources */,
 				C32F2A8D1E843F89002745BA /* spAlltest.cpp in Sources */,
+				7C692C0D2027CF8500529D85 /* sparseMatrix.cpp in Sources */,
 				7C9B42221E9ADD7100B2D9B1 /* maxFlowTest.cpp in Sources */,
 				7C7E4AA420277D9700347B53 /* sparseArray.cpp in Sources */,
 				C349526D1CB5645900775030 /* main.cpp in Sources */,

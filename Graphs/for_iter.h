@@ -18,12 +18,14 @@ template <class T, class Context = void, class Enable = void> class for_iter_t {
     T& t;
     size_t pos;
 public:
-    for_iter_t(T& t) : t(t), pos(0) {}
+    // const_cast - для возможности работать и с константными и с неконстантными итераторами.
+    for_iter_t(const T& t) : t(const_cast<T&>(t)), pos(0) {}
     typename T::reference operator*() { return t[pos]; }
     bool operator != (const for_iter_t& f) const { assert(&f.t == &t); return pos != t.size(); }
     void operator++() { ++pos; }
 };
+
 // Функция для инстанциирования for_iter_t чтобы параметр шаблона вывелся компилятором.
-//template<class T> for_iter_t<T> for_iter(T& t) { return for_iter_t<T>(t); };
+template<class T> for_iter_t<T> for_iter(T& t) { return for_iter_t<T>(t); };
 
 #endif /* for_iter_h */

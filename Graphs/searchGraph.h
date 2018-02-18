@@ -226,7 +226,7 @@ namespace Graph {
     
     /////////////////////////////////////////////////////////////////
     // Bridges. Поиск мостов. На основе Седжвик 18.7.
-    // O(V^2) для матрицы смежности, O(V+E) для списка смежности. 
+    // O(V^2) для матрицы смежности, O(V+E) для списка смежности.
     template <class G, class Inspector> class Bridges_T {
         const G& g;
         Inspector& i;
@@ -235,41 +235,34 @@ namespace Graph {
         vector<size_t> low; // нижний номер enter достижимости по dfs c обратной связью из вершины v.
         using Edge = typename G::Edge;
         
-        // Реберный DFS. Для корректной работы мы всегда должны знать из кокой вершины мы пришли.
-        bool dfs(Edge e) {
-            if(enter[e.w] == 0) {
-                enter[e.w] = ++cnt;
-                low[e.w] = cnt;
-                bridges(e);
-                return true;
+        // Реберный DFS. Для корректной работы мы всегда должны знать родителя в дереве обхода (из какой вершины мы пришли)
+        void dfs(size_t v, size_t p = -1) {
+            enter[v] = ++cnt;
+            low[v] = cnt;
+            for (size_t w : g.adjacent(v)) {
+                if (w == p) continue; // Пропускаем родителя.
+                if (enter[w] > 0) { // Вершина уже посещена.
+                    low[v] = min(low[v], enter[w]);
+                } else {
+                    dfs(w, v);
+                    if (low[w] == enter[w]) {
+                        i.visit(Edge(v, w)); // обнаружен мост.
+                    } else {
+                        low[v] = min(low[v], low[w]);
+                    }
+                }
             }
-            // вершина e.w уже была посещена.
-            return false;
         }
         
-        void bridges(Edge e) {
-            size_t v = e.w;
-            for(size_t w : g.adjacent(v)) {
-                if (w == e.v) {
-                    continue; // Вот ради этой проверки нам нужен реберный DFS.
-                }
-                if (dfs(Edge(v, w))) {
-                    if (low[w] < low[v]) {
-                        low[v] = low[w];
-                    }
-                    if (low[w] == enter[w]) {
-                        i.visit(Edge(v,w)); // обнаружен мост.
-                    }
-                } else if (low[v] > enter[w]) {
-                    low[v] = enter[w]; // обнаружена обратная связь.
-                }
-            }
-        }
-
     public:
         Bridges_T(const G& g, Inspector& i) : g(g), i(i), cnt(0), enter(g.size()), low(g.size()) {
             trace("Bridges_T");
-            dfs(Edge(-1, 0)); // -1 означает - идем из ниоткуда. 0 можно ставить любой вершиной графа.
+            // Проходим по всем непосещённым вершинам.
+            for (size_t v = 0; v < g.size(); v++) {
+                if (enter[v] == 0) {
+                    dfs(v);
+                }
+            }
         }
     };
     
@@ -287,51 +280,44 @@ namespace Graph {
         vector<size_t> enter; // порядок обхода по dfs.
         vector<size_t> low; // нижний номер enter достижимости по dfs c обратной связью из вершины v.
         size_t root;
+        bool rootIsArtPoint;
         
         // DFS.
-        bool dfs(size_t v) {
-            if(enter[v] == 0) {
-                // Первый вход в вершину v.
-                enter[v] = ++cnt;
-                low[v] = cnt;
-                artPoints(v);
-                return true;
-            }
-            // вершина v уже была посещена.
-            return false;
-        }
-        
-        void artPoints(size_t v) {
-            size_t children = 0; // потомки в которые мы заходим в dfs из этого узла.
-            for(size_t w : g.adjacent(v)) {
-                if (dfs(w)) {
+        void dfs(size_t v) {
+            enter[v] = ++cnt;
+            low[v] = cnt;
+            size_t children = 0;
+            for (size_t w : g.adjacent(v)) {
+                if (enter[w] > 0) {
+                    low[v] = min(low[v], enter[w]);
+                } else {
                     children++;
-                    // Если наш enter == low детей то мы - шарнир.
-                    if (low[w] < low[v]) {
-                        low[v] = low[w];
+                    dfs(w);
+                    if (enter[v] == low[w]) { // v - шарнир.
+                        if (v != root) i.visit(v);
+                    } else {
+                        low[v] = min(low[v], low[w]);
                     }
-                    // Условие для не-корня. В принципе оно подходит и для корня, но тогда корень выведется 2 раза.
-                    if (v != root && enter[v] == low[w]) {
-                        i.visit(v);
-                    }
-                } else if (low[v] > enter[w]) {
-                    low[v] = enter[w]; // обнаружена обратная связь.
                 }
             }
-            // Условие для корня.
-            if (v == root && children > 1) {
-                i.visit(v);
-            }
+            if (v == root && children > 1) rootIsArtPoint = true; // root - шарнир.
         }
         
     public:
         ArtPoint_T(const G& g, Inspector& i) : g(g), i(i), cnt(0), enter(g.size()), low(g.size()) {
             trace("ArtPoint_T");
-            root = 0; // 0 можно ставить любой вершиной графа.
-            dfs(root);
+            // Проходим по всем непосещённым вершинам.
+            for (size_t v = 0; v < g.size(); v++) {
+                if (enter[v] == 0) {
+                    root = v;
+                    cnt = 0;
+                    dfs(v);
+                    if (rootIsArtPoint) i.visit(root);
+                }
+            }
         }
     };
-    
+
     // Ускоритель вызова.
     template <class G, class I>
     ArtPoint_T<G,I> ArtPoints(const G& g, I& i) { return ArtPoint_T<G,I>(g,i); }
@@ -366,14 +352,14 @@ namespace Graph {
             size_t currentCount = 0;
             size_t nextCount = 0;
             
-            while( !q.empty() ) {
+            while (!q.empty()) {
                 a = q.front(); q.pop();
                 size_t count = state[a].count;
                 if (a == b) {
                     // Дошли до B
                     return count;
                 }
-                for( size_t i : g.adjacent(a) ) {
+                for (size_t i : g.adjacent(a)) {
                     VertexState& vs = state[i];
                     if (vs.leave) continue; // Вершина принадлежит предыдущим ребрам пути.
                     if(vs.count == 0) {
@@ -403,7 +389,6 @@ namespace Graph {
     // Ускоритель вызова.
     template <class G>
     CountBFS_T<G> countBFS(const G& g) { return CountBFS_T<G>(g); }
-
 }
 
 #endif /* search_h */
