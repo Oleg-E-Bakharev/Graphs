@@ -109,7 +109,8 @@ namespace Graph {
 		
 	public:
 		TC_T( const G& g) : g(g), tc(g.size()) { trace("TC_T DFS");
-			for( size_t v = 0; v < g.size(); v++ ) dfs_(v, v);
+			for( size_t v = 0; v < g.size(); v++ )
+                dfs_(v, v);
 		}
 		
 		bool reachable( size_t v, size_t w ) const { return tc.edge(v , w); }

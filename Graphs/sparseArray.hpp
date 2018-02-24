@@ -196,16 +196,30 @@ template <typename T> class SparseArray {
 
 	// Итератор с произвольным доступом.
 	class Iterator {
-		using Pos = typename std::vector<std::reference_wrapper<Item>>::iterator;
+        using Container = std::vector<std::reference_wrapper<Item>>;
+		using Pos = typename Container::iterator;
 		Pos _pos;
 		Iterator(const Pos& pos) : _pos(pos) {}
 		friend class SparseArray;
 	public:
-		Item& operator*() const {return _pos->get();}
-		Item* operator->() const {return _pos;}
-		void operator++() { ++_pos; }
+        using iterator_category = std::random_access_iterator_tag;
+        using difference_type = typename Pos::difference_type;
+        using value_type = Item;
+        using pointer = typename Container::pointer;
+        using reference = typename Container::reference;
+        
+		Item& operator*() {return _pos->get();}
+        Item* operator->() {return _pos;}
+        const Item& operator*() const {return _pos->get();}
+        const Item* operator->() const {
+            const Item& item = *_pos;
+            return &item;
+        }
+        Iterator& operator++() { ++_pos; return *this; }
+        Iterator& operator+=(size_t size) { _pos += size; return *this; }
 		bool operator!=(const Iterator& it) const { return _pos != it._pos; }
 		Iterator operator+(size_t offset) const { return Iterator(_pos + offset); }
+        difference_type operator-(const Iterator& it) const { return _pos - it._pos; }
 	};
 	
 public:

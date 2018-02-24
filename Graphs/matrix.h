@@ -26,7 +26,7 @@ template<typename T, typename Container, typename Context = void> class basic_sl
 	slice s;
 	// Вместо T& используем typename vector<T>::reference для совместимости с vector<bool>
 	typename VT::reference ref(size_t i) const { return (v)[s.start() + i * s.stride()]; }
-    
+    friend class for_iter_t<basic_slice_iter, Context>;
 public:
 	typedef T value_type;
 	typedef typename VT::reference reference;
@@ -39,6 +39,9 @@ public:
 	size_t size() const { return s.size(); }
 	const_reference operator[](size_t i) const { return ref(i); }
 	reference operator[](size_t i) { return ref(i); }
+    
+    size_t lower_index() const { return s.start(); }
+    size_t upper_index() const { return s.start() + s.size() * s.stride(); }
 	
 	// Для for(:)
     for_iter_t<basic_slice_iter, Context> begin() { return for_iter_t<basic_slice_iter, Context>(*this); }

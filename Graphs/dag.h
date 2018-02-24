@@ -21,10 +21,19 @@ namespace Graph {
     template <class G> class TC_T<G, DAGTraits> {
         const G& g;
         vector<size_t> enter;
-        size_t cnt;
+        size_t cnt = 0;
         // Исходим из предположения, что граф транзитивного замыкания будет очень плотным.
         // Плюс граф на списках смежности не приспособлен для использования с динамической вставкой ребер.
         DenseGraphD tc;
+        
+        // Ленивые вычисления.
+        void processIfNeed_() const {
+            if (cnt == 0) {
+                for( size_t v = 0; v < g.size(); v++ ) {
+                    const_cast<TC_T&>(*this).dfs_(v);
+                }
+            }
+        }
         
         void dfs_( size_t v ) {
             enter[v] = cnt++;
@@ -43,14 +52,10 @@ namespace Graph {
         }
         
     public:
-        TC_T( const G& g) : g(g), tc(g.size()), enter(g.size(), -1), cnt(0) { trace("TC_T DAG");
-			for( size_t v = 0; v < g.size(); v++ ) {
-				dfs_(v);
-			}
-        }
+        TC_T( const G& g) : g(g), tc(g.size()), enter(g.size(), -1) { trace("TC_T DAG"); }
         
-        bool reachable( size_t v, size_t w ) const { return tc.edge(v , w); }
-        const DenseGraphD& getTC() const { return tc; }
+        bool reachable( size_t v, size_t w ) const { processIfNeed_(); return tc.edge(v , w); }
+        const DenseGraphD& getTC() const { processIfNeed_(); return tc; }
     };
     
     ///////////////////////////////////////////////////////////////
@@ -63,6 +68,7 @@ namespace Graph {
         size_t cnt;
         bool isDag;
         
+        // Возвращает false если обнаружится цикл.
         bool dfs_ (size_t v) {
             enter[v] = cnt++;
             for ( size_t w : g.adjacent(v) ) {
@@ -70,7 +76,7 @@ namespace Graph {
                     if(!dfs_(w)) return false;
                 } else {
                     if ( leave[w] == -1 ) {
-                        // back edge detected. Not a DAG.
+                        // Обнаружено обратное ребро. Не DAG.
                         isDag = false;
                         return false;
                     }
@@ -164,22 +170,21 @@ namespace Graph {
 		const G& g;
 		SCGab_T<G> sc;
 		DenseDAG dag; // Удобно реализовано избавление от многократного дублирования ребер.
-		shared_ptr<TC_T<DenseDAG>> dagTCPtr;
+		TC_T<DenseDAG> dagTC;
 		
 	public:
-		TCSC_T( const G& g ) : g(g), sc(g), dag(sc.size()) { trace("TCSC_T");
+		TCSC_T( const G& g ) : g(g), sc(g), dag(sc.size()), dagTC(dag) { trace("TCSC_T");
 			for ( size_t v = 0; v < g.size(); v++ )
 				for ( size_t w : g.adjacent(v) )
 					dag.insert({sc.id(v), sc.id(w)});
-			dagTCPtr = make_shared<TC_T<DenseDAG>>(TC(dag));
 		}
 		
-		bool reachable( size_t v, size_t w ) const { return dagTCPtr->reachable(sc.id(v) ,sc.id(w)); }
+		bool reachable( size_t v, size_t w ) const { return dagTC.reachable(sc.id(v) ,sc.id(w)); }
 		
         void out(std::ostream& os) {
 			os << dag;
 			os << "DAG TC\n";
-			os << dagTCPtr->getTC();
+			os << dagTC.getTC();
 			os << "Result TC\n";
 			for ( size_t v = 0; v < g.size(); v++ ) os << sc.id(v) << ", ";
 			os << endl;

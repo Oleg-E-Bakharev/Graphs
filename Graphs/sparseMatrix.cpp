@@ -7,6 +7,9 @@
 //
 
 #include "sparseMatrix.hpp"
+#include <random>
+
+using namespace std;
 
 void testSparseMatrix()
 {
@@ -20,6 +23,16 @@ void testSparseMatrix()
     m[1][1] = 10;
     
     cout << m;
-//    auto m1 = m.tr();
-//    cout << m1;
+    
+    SparseMatrix<int> sm(20, 20);
+    default_random_engine gen(random_device{}());
+    uniform_int_distribution<> dis(0, 20);
+    for(int i = 0; i < 30; i++) {
+        size_t j = dis(gen);
+        size_t k = dis(gen);
+        if (i != j) {
+            sm[j][k] = 1;
+        }
+    }
+    cout << sm;
 }

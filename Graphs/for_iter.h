@@ -14,7 +14,7 @@
 // Для использования T должен поддерживать [size_t] и size()
 // А также тип reference как ссылка на хранимый тип.
 // Через контекст можно специализировать итератор для специальных целей (напр в матрице смежности графа).
-template <class T, class Context = void, class Enable = void> class for_iter_t {
+template <typename T, typename Context = void, typename Enable = void> class for_iter_t {
     T& t;
     size_t pos;
 public:

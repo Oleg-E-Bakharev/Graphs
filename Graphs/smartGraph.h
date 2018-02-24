@@ -15,6 +15,11 @@
 #include "graphBase.h"
 #include "sparceMatrix.hpp"
 
+/*
+ Нужно в матрице кэшировать начальную позицию списка смежности и проходить последовательно по элементам пока они попадают
+ под slice-итератор строки матрицы.
+ */
+
 // Специализация for_iter_t для итерации по смежным вершинам.
 // Для контекстов, WeightType которых есть bool.
 template <class T, class C> class for_iter_t <T, C,
@@ -28,15 +33,27 @@ public:
     void operator++() { while(++pos < t.size() && t[pos] == false); }
 };
 
-///////////////////////////////////////
+
 namespace Graph {
+
+    // Итератор по смежным вершинам графа
+    template<typename GT> class GraphIter {
+    public:
+        GraphIter(size_t v)
+    };
     
-    // Граф на матрице смежности.
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    
+    // Граф на разреженой матрице смежности.
     template<typename GT = GraphTraits>
-    class SmartGraph_T {
+    class Graph_T {
         using AdjMatrix = SparseMatrix<typename GT::WeightType, GT>;
         AdjMatrix _adj;
         size_t _edges = 0;
+        // Вектор первой вершины смежности для каждой вершины.
+        std::vector<size_t> _firstAdj;
         
     public:
         using Traits = GT;
@@ -45,18 +62,17 @@ namespace Graph {
         using WeightType = typename Traits::WeightType;
         using NodeType = typename GT::AdjListNodeType;
         
-        SmartGraph_T(size_t v) : _adj(v, v) {}
+        Graph_T(size_t v) : _adj(v, v) {}
         
-        // Конструктор от другого графа.
-        template<class G> DenseGraph_T ( const G& g,
-                                        typename enable_if<is_base_of<GraphTraits, typename G::Traits>::value>::type* = 0 ) : _adj(g.size(), g.size())
+        // Конструктор от другого графа c подходящими свосйствами.
+        template<class G> Graph_T ( const G& g,
+                                        typename enable_if<is_base_of<GT, typename G::Traits>::value>::type* = nullptr ) : _adj(g.size(), g.size())
         {
-            for ( size_t v = 0; v < g.size(); v++ )
-                for( size_t w = 0; w < g.size(); w++ )
-                    if ( g.edge(v, w) ) {
-                        _adj[v][w] = true;
-                        _edges++;
-                    }
+            for ( size_t v = 0; v < g.size(); v++ ) {
+                for(auto& w : g.adjacent(v)) {
+                    
+                }
+            }
         }
         
         size_t size() const { return _adj.h(); }
@@ -96,21 +112,16 @@ namespace Graph {
         bool edge(size_t v, size_t w) const { return _adj[v][w]; }
         
         using AdjIter = typename AdjMatrix::vec;
-        
         AdjIter adjacent(size_t v) const { return _adj[v]; }
-        // Итератор смежности по транспонированному графу.
-        AdjIter adjacentTranspond(size_t v) const { return _adj.col(v); }
-        
-        using AdjMethod = decltype(&DenseGraph_T::adjacent);
         
         void reweight(size_t v, const NodeType& node, WeightType weight) {
             _adj[v][node.dest] = weight;
         }
     };
     
-    using DenseGraph = DenseGraph_T<GraphTraits>;
-    using DenseGraphD = DenseGraph_T<DirectedGraphTraits>;
-    using DenseDAG = DenseGraph_T<DAGTraits>;
+    using Graph = Graph_T<GraphTraits>;
+    using GraphD = Graph_T<DirectedGraphTraits>;
+    using DAG = Graph_T<DAGTraits>;
 }
 
 

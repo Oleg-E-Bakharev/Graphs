@@ -32,8 +32,8 @@ namespace Graph {
     template <class G, class C> class CC_T<G, C,
     typename enable_if<is_same<G, DenseGraph_T<C>>::value &&
     !is_base_of<DirectedGraphTraits, C>::value>::type> {
-        size_t cnt;
-        size_t scnt;
+        size_t cnt = 0;
+        size_t scnt = 0;
         vector<size_t> ids, leave;
         
         void dsf_( const G& g, size_t v) {
@@ -46,7 +46,7 @@ namespace Graph {
         template<class T> friend void SCTrace(ostream&, const T&);
 		
     public:
-        CC_T( const G& g ) : cnt(0), scnt(0), ids(g.size(), -1), leave(g.size()) { trace("CC_T Kosaraju");
+        CC_T( const G& g ) : ids(g.size(), -1), leave(g.size()) { trace("CC_T Kosaraju");
 			// Делаем "топсорт" на обращении графа.
 			G r(g.size());
 			reverseGraph(g, r);
@@ -138,7 +138,7 @@ namespace Graph {
             }
 			if ( min < low[v]) {
 				low[v] = min;
-			} else { size_t w;
+			} else { size_t w; // нашли сильную компоненту.
                 do {
                     ids[ w = st.top() ] = scnt; st.pop();
                     low[w] = -1; // очень большое положительное число.
@@ -197,9 +197,8 @@ namespace Graph {
                 path.pop();
                 size_t w;
                 do {
-					w = st.top();
+					w = st.top(); st.pop();
                     ids[w] = scnt;
-                    st.pop();
                 } while ( w != v );
                 scnt++;
             }

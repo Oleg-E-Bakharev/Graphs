@@ -237,8 +237,8 @@ void testBrisgesJoints() {
 }
 
 template <class G> void testDirGraph(G& g) {
-//    buildDirGraph(g);
-    buildDAG(g);
+    buildDirGraph(g);
+//    buildDAG(g);
 //    buildWeightedGraph(g);
 	cout << g;
 	auto s = searchTrace(g);
@@ -276,15 +276,15 @@ template <class G> void testDirGraph(G& g) {
 
 void testDenseDirGraph() {
 	cout << "Dense directed graph:\n";
-//	DenseGraphD g(13);
-	DenseDAG g(13);
+    DenseGraphD g(13);
+//    DenseDAG g(13);
     testDirGraph(g);
 }
 
 void testSparseDirGraph() {
 	cout << "Sparse directed graph:\n";
-//	SparseGraphD g(13);
-    SparseDAG g(13);
+    SparseGraphD g(13);
+//    SparseDAG g(13);
 	testDirGraph(g);
 }
 
@@ -380,7 +380,7 @@ void test_k_neighbourGraph() {
 }
 
 int main(int argc, const char * argv[]) {
-    testBrisgesJoints();
+//    testBrisgesJoints();
 //    testSparseArray();
 //    testSparseMatrix();
 //   testGraphs();
