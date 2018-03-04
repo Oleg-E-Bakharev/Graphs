@@ -23,61 +23,55 @@ namespace Graph {
         using Traits = typename G::Traits;
         using Edge = typename Traits::EdgeType;
         using Weight = typename Traits::WeightType;
-        using Node = typename Traits::AdjListNodeType;
+        const Weight INF = std::numeric_limits<double>::max();
         
         const G& _g;
-        // истоки SPT (родители SPT). В этом векторе:
-        // node.dest есть наоборот - исток ребра минимального пути.
-        // node.weight накопденный минимальный вес пути до индексной точки.
-        std::vector<Node> _spt;
-        
-        // Точка останова. Если не была указана, то после вычислений будет указывать на максимально удаленную мершину от исходной.
+        vector<size_t> _parent; // Истоки ребер кратчайшего пути (родители SPT).
+        vector<Weight> _distance; // Расстояние от исходной вершины до i-й.
+
+        // Точка останова. Если не была указана, то после вычислений будет указывать на максимально удаленную вершину от исходной.
         size_t _finish;
         
         // Priority-first search.
-        void pfs_(size_t v) {
+        void pfs_(size_t s) {
+            _distance[s] = 0.; // Установим в начальную точку пути нулевой вес.
+            // Очередь вершин по приоритету возрастания веса.
+            auto compare = [this](size_t l, size_t r)->bool { return this->_distance[l] > this->_distance[r]; };
+            std::priority_queue<size_t, std::vector<size_t>, decltype(compare)> pfsQueue(compare);
+            pfsQueue.push(s);
             
-            _spt[v] = {size_t(-1), 0.}; // Начальному элементу ставим 0-й вес.
-            std::priority_queue<Node, std::vector<Node>, WeightGreater<Node>> _nodesQueue;
-            _nodesQueue.push({v, 0.}); // Установим в начальную точку путь нулевого веса.
+            size_t farest = s; // Наиболее удаленная вершина от v.
             
-            size_t farest = v; // Наиболее удаленная вершина от v.
-            
-            // Применение вектора посещенности позволяет избегать удаления неоптимальных ребер из очереди и
-            // зацикливания на отрицательных циклах.
+            // Защита от отрицательных циклов.
             vector<bool> used(_g.size());
             
-            while (!_nodesQueue.empty()) {
-                Node from = _nodesQueue.top();
-                _nodesQueue.pop();
-                size_t v = from.dest;
+            while (!pfsQueue.empty()) {
+                size_t v = pfsQueue.top(); pfsQueue.pop();
                 
-                if (used[v]) {
-                    continue;
-                }
+                if (v == _finish) return;
+
+                if (used[v]) continue;
                 used[v] = true;
                 
-                if (v == _finish) {
-                    return;
-                }
-                
-                // Добавляем смежные ребра в множество ребер-кандидатов в MST.
+                // Добавляем вершины в множество вершин-кандидатов в SPT.
                 for (auto node : _g.adjacent(v)) {
-                    Weight& weight = node.weight;
-                    weight += from.weight;
+                    const size_t w = node.dest;
+                    // Пропускаем рёбра ведущие в s.
+                    if (w == s) continue;
+                    const Weight distance = node.weight + _distance[v];
 					
-                    Node& prevNode = _spt[node.dest];
-                    
-                    // Если в вершину зашли с минимальным ребром. Обновляем MST.
-                    if ( weight < prevNode.weight ) {
+                    size_t prevParent = _parent[w];
+            
+                    // Если в вершину зашли с минимальным ребром. Обновляем SPT.
+                    if ( prevParent == -1 || distance < _distance[w] ) {
                         // Корректируем mst.
-                        prevNode = {v, weight};
-						//  Занесение нового ребра не изменит логику выборки, поскольку новое ребро
-						// встанет в очередь перед существущим.
-                        _nodesQueue.push(node); // lg(v).
+                        _parent[w] = v;
+                        _distance[w] = distance;
+                        // Нестрашно повтороное занесение вершины, поскольку выберется вершина один раз с минимальным весом.
+                        pfsQueue.push(w); // lg(V).
                         
                         // Вычисляем наиболее удаленную вершину.
-                        if (weight > _spt[farest].weight) {
+                        if (distance > _distance[farest]) {
                             farest = node.dest;
                         }
                     }
@@ -90,53 +84,46 @@ namespace Graph {
         
     public:
         // Из точки А в точку B.
-        SptDijkstra_T(const G& g, size_t a, size_t b = -1) : _g(g), _finish(b),
-        _spt(g.size(), {size_t(-1), std::numeric_limits<double>::max()}) {
+        SptDijkstra_T(const G& g, size_t a, size_t b = -1) : _g(g), _finish(b), _parent(g.size(), -1), _distance(g.size(), INF) {
             pfs_(a);
+            assert(_parent[a] == -1);
         }
         
         // Целевая вершина. Если в конструкторе не была указана, то вернет наиболее удаленную вершину.
         size_t dest() const { return _finish; }
         
         // Исток последнего ребра пути.
-        size_t source(size_t v) const { return _spt[v].dest; }
+        size_t source(size_t v) const { return _parent[v]; }
         // Вес (расстояние) кратчайшего пути.
         // Если конечная точка не указана - будет возвращен вес (расстояние) кратчайшего пути в указанную в конструкторе или наиболее удаленную вершину от исходной.
         // Иначе будет возвращен путь будет в указанную вершину. При этом, если в конструкторе была указана конечная вершина, то результат может быть недостоверен.
         Weight distance(size_t dest = -1) const {
-            if (dest == -1) {
-                dest = _finish;
-            }
-            return _spt[dest].weight;
+            if (dest == -1) dest = _finish;
+            return _distance[dest];
         }
 
         // Формирование вектора кратчайшего пути.
         // Если конечная точка не указана - будет сформерован вектор кратчайшего пути в указанную в конструкторе или наиболее удаленную вершину от исходной.
         // Иначе путь будет в указанную вершину. При этом, если в конструкторе была указана конечная вершина, то результат может быть недостоверен.
-        std::vector<Edge> spt(size_t dest = -1) const {
+        // Поскольку расчёт ведётся только до указанной в конструкторе вершины.
+        std::vector<Edge> spt(size_t w = -1) const {
             std::vector<Edge> spt;
 
-            if (dest == -1) {
-                dest = _finish;
-            }
-            for(Node n = _spt[dest]; n.dest != -1; n =_spt[n.dest]) {
-                // Выставляем правильное направление ребра (актуально для направленных графов).
-                spt.push_back({n.dest, {dest, n.weight}});
-                dest = n.dest;
+            if (w == -1) w = _finish;
+            for(auto v = _parent[w]; v != -1; w = v, v =_parent[w]) {
+                spt.push_back({v, {w, _distance[w]}});
             }
             reverse(spt.begin(), spt.end());
             return spt;
         }
         
-        // Вывод MST.
+        // Вывод SPT.
         friend std::ostream& operator<<(std::ostream& os, const SptDijkstra_T& s) {
-            auto spt = s.spt();
             os << "SptDijkstra\n";
-            for (auto e : spt) {
+            for (auto e : s.spt()) {
                 os << e << "\n";
             }
-            os << "\n";
-            return os;
+            return os << "\n";
         }
     };
     
@@ -224,11 +211,14 @@ namespace Graph {
             // Используем очередь всех вершин, для которых может оказаться эффективной релаксация.
             std::queue<size_t> q;
             
-            size_t limit = _g.size(); // Разделитель проходов. Позволяет считать проходы и остановиться после g->size проходов.
-            size_t count = 0;
+            size_t count = 0; // счётчик проходов.
+            size_t limit = _g.size(); // Разделитель проходов. Позволяет считать проходы.
             
             q.push(v);
             q.push(limit);
+            
+            // Отслеживаем изменения SPT.
+            bool sptChanged = false;
             
             while (!q.empty()) {
                 // Извлекаем следующую вершину и проверяем, не равна ли она разделителю.
@@ -236,16 +226,16 @@ namespace Graph {
                 q.pop();
                 
                 if (v == limit) {
-                    if (q.empty()) {
-                        // Кратчайший путь найден.
-                        return;
-                    }
-                    if (++count > limit) {
-                        // Прошли максимальное количество проходов + 1.
+                    if (q.empty()) return; // Кратчайший путь найден.
+                    
+                    if (++count == limit || !sptChanged) {
+                        // Прошли максимальное количество проходов + 1 или
+                        // Прошли проход при котором дерево SPT не изменилось, но очередь вершин непуста.
                         // В графе присутствует отрицательный цикл.
                         _hasNegativeCycle = true;
                         return;
                     }
+                    sptChanged = false;
                     q.push(limit);
                     continue;
                 }
@@ -254,19 +244,22 @@ namespace Graph {
                 assert(_distance[v] != INF);
                 
                 for (auto node : _g.adjacent(v)) {
-                    if (tryRelax_({v, node})) {
-                        // Если релаксация привела к успеху, то заносим вершину в очередь.
-                        q.push(node.dest);
-                    }
+                    sptChanged = tryRelax_({v, node}, q);
                 }
             }
         }
     
-        bool tryRelax_(const Edge& e) {
+        // Возвращает true, если SPT изменился.
+        bool tryRelax_(const Edge& e, std::queue<size_t>& q) {
             if (_distance[e.w] > _distance[e.v] + e.weight) {
                 _distance[e.w] = _distance[e.v] + e.weight;
-                _parent[e.w] = e.v; // Обновляем кратчайшее ребро.
-                return true;
+                // Если ребро релактировалось, то заносим вершину в очередь.
+                q.push(e.w);
+                if (_parent[e.w] != e.v) {
+                    _parent[e.w] = e.v; // Обновляем кратчайшее ребро.
+                    return  true;
+                }
+                return false;
             }
             return false;
         }

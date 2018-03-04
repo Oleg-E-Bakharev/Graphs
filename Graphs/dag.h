@@ -18,6 +18,8 @@
 namespace Graph {
     
     // Специализация транзитивного замыкания для DAG. Седжвик 19.9
+    // Обратных ребер нет. В прямых и перекрёстных ребрах DFS уже заверщен.
+    // О(V(V+X)) где X - число перекрёстных ребер.
     template <class G> class TC_T<G, DAGTraits> {
         const G& g;
         vector<size_t> enter;
@@ -41,10 +43,11 @@ namespace Graph {
             for ( size_t w : g.adjacent(v) ) {
 				tc.insert({v, w});
 				if (enter[w] == -1) {
-					dfs_(w);
+					dfs_(w); // Для древесных ребер - DFS.
 				} else if ( enter[w] > enter[v] ) {
 					continue; // Для прямых ребер все уже посчитано.
 				}
+                // В строку v кладём OR между w и v строками МСТЗ.
 				for ( size_t i = 0; i < tc.size(); i++ ) {
                     if ( tc.edge(w, i) ) tc.insert({v, i});
 				}
@@ -100,13 +103,13 @@ namespace Graph {
         bool isDAG() const { return isDag; }
         
         // Возвращает последовательность вершин в топологическом порядке.
-        const vector<size_t>& ts(){ return top; }
+        const vector<size_t>& ts() const { return top; }
 
         // Возвращает i-ю вершину в топологическом порядке.
         size_t operator[] (size_t i) const { return top[i]; }
 
         // Возвращает вектор переименования вершин так, чтобы ребра выходили из вершин с большим номером и входили в вершины с меньшим номером.
-        const vector<size_t>& relabel() { return leave; }
+        const vector<size_t>& relabel() const { return leave; }
     };
     
     // Ускоритель вызова.
