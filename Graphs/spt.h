@@ -42,29 +42,28 @@ namespace Graph {
             
             size_t farest = s; // Наиболее удаленная вершина от v.
             
-            // Защита от отрицательных циклов.
+            // Защита от зацикливания на отрицательных циклах.
             vector<bool> used(_g.size());
             
             while (!pfsQueue.empty()) {
-                size_t v = pfsQueue.top(); pfsQueue.pop();
+                const size_t v = pfsQueue.top(); pfsQueue.pop();
                 
                 if (v == _finish) return;
 
                 if (used[v]) continue;
                 used[v] = true;
                 
+                const Weight distanceV = _distance[v];
+                
                 // Добавляем вершины в множество вершин-кандидатов в SPT.
                 for (auto node : _g.adjacent(v)) {
                     const size_t w = node.dest;
-                    // Пропускаем рёбра ведущие в s.
-                    if (w == s) continue;
-                    const Weight distance = node.weight + _distance[v];
+                    if (w == s) continue; // Все пути в исходную вершину игнорируем чтобы выполнилось правило parent[s] == -1.
+                    const Weight distance = distanceV + node.weight;
 					
-                    size_t prevParent = _parent[w];
-            
                     // Если в вершину зашли с минимальным ребром. Обновляем SPT.
-                    if ( prevParent == -1 || distance < _distance[w] ) {
-                        // Корректируем mst.
+                    if ( distance < _distance[w] ) {
+                        // Корректируем spt.
                         _parent[w] = v;
                         _distance[w] = distance;
                         // Нестрашно повтороное занесение вершины, поскольку выберется вершина один раз с минимальным весом.
@@ -84,9 +83,9 @@ namespace Graph {
         
     public:
         // Из точки А в точку B.
-        SptDijkstra_T(const G& g, size_t a, size_t b = -1) : _g(g), _finish(b), _parent(g.size(), -1), _distance(g.size(), INF) {
-            pfs_(a);
-            assert(_parent[a] == -1);
+        SptDijkstra_T(const G& g, size_t s, size_t t = -1) : _g(g), _finish(t), _parent(g.size(), -1), _distance(g.size(), INF) {
+            pfs_(s);
+            assert(_parent[s] == -1);
         }
         
         // Целевая вершина. Если в конструкторе не была указана, то вернет наиболее удаленную вершину.
@@ -108,7 +107,7 @@ namespace Graph {
         // Поскольку расчёт ведётся только до указанной в конструкторе вершины.
         std::vector<Edge> spt(size_t w = -1) const {
             std::vector<Edge> spt;
-
+            // Мы не сохраняем исходную вершину, но соблюдаем правило что parent[s] == -1.
             if (w == -1) w = _finish;
             for(auto v = _parent[w]; v != -1; w = v, v =_parent[w]) {
                 spt.push_back({v, {w, _distance[w]}});
@@ -244,7 +243,7 @@ namespace Graph {
                 assert(_distance[v] != INF);
                 
                 for (auto node : _g.adjacent(v)) {
-                    sptChanged = tryRelax_({v, node}, q);
+                    sptChanged |= tryRelax_({v, node}, q);
                 }
             }
         }
@@ -253,7 +252,7 @@ namespace Graph {
         bool tryRelax_(const Edge& e, std::queue<size_t>& q) {
             if (_distance[e.w] > _distance[e.v] + e.weight) {
                 _distance[e.w] = _distance[e.v] + e.weight;
-                // Если ребро релактировалось, то заносим вершину в очередь.
+                // Если ребро релакcировалось, то заносим вершину в очередь.
                 q.push(e.w);
                 if (_parent[e.w] != e.v) {
                     _parent[e.w] = e.v; // Обновляем кратчайшее ребро.

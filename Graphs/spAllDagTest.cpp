@@ -32,7 +32,7 @@ template <class G> void spAllBuildDag(G& g) {
 
 template <class G> void testSpAllDag(const G& g)
 {
-    cout << spAllDagMax(g);
+    cout << spAllDagMax(g) << std::endl;
     cout << spAllDagMin(g);
 }
 

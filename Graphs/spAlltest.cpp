@@ -16,6 +16,7 @@ using namespace std;
 using namespace Graph;
 
 template <class G> void spAllBuildGraph(G& g) {
+    // Взвешенный граф
     // Рис 21.1 Седжвик.
     insertEdges(g, {
         {0, 1, .41},
@@ -33,6 +34,7 @@ template <class G> void spAllBuildGraph(G& g) {
 }
 
 template <class G> void spAllBuildGraphNegative(G& g) {
+    // Взвешенный граф с отрицательгными весами.
     // Рис 21.26 Седжвик.
     insertEdges(g, {
         {0, 1, .41},
@@ -51,6 +53,7 @@ template <class G> void spAllBuildGraphNegative(G& g) {
 
 template <class G> void testSpAll(G& g)
 {
+    cout << g;
 //    auto spad = spAllDijkstra(g);
 //    cout << spad;
 //    cout << "Path 0-2 distance: " << spad.distance(0, 2) << endl;
@@ -66,7 +69,7 @@ template <class G> void testSpAll(G& g)
     for (const auto& edge : spaf.path(0, 2)) {
         cout << edge << endl;
     }
-//    cout << diameter(g, spaf);
+    cout << diameter(g, spaf);
 	
 	auto spaj = spAllJohnson(g);
 	cout << spaj;
@@ -75,7 +78,7 @@ template <class G> void testSpAll(G& g)
 	for (const auto& edge : spaj.path(0, 2)) {
 		cout << edge << endl;
 	}
-//	cout << diameter(g, spaj);
+    cout << diameter(g, spaj);
 
 }
 
@@ -83,15 +86,15 @@ static void testDenseSpAll() {
     cout << "Dense weighted dir graph:\n";
     DenseGraphWD g(6);
 //    spAllBuildGraph(g);
-	spAllBuildGraphNegative(g);
+    spAllBuildGraphNegative(g);
     testSpAll(g);
 }
 
 static void testSparseSpAll() {
     cout << "\nSparse weighted dir graph:\n";
     SparseGraphWD g(6);
-	spAllBuildGraphNegative(g);
 //    spAllBuildGraph(g);
+    spAllBuildGraphNegative(g);
     testSpAll(g);
 }
 

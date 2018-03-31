@@ -63,13 +63,17 @@ namespace Graph {
         
         friend std::ostream& operator<<(std::ostream& os, const SPAllDagMax_T& spAll) {
             using namespace std;
-            os << "SPAllDagMax_T" << endl << "Distances:\n";
-            for (Weight weight : spAll._distances) {
-                os << setw(4) << weight << "|";
+            os << "SPAllDagMax_T\n";
+            for (size_t i = 0; i < spAll._sources.size(); i++ ) {
+                os << setw(4) << i << "|";
             }
             os << "\nSources\n";
             for (size_t source : spAll._sources) {
                 os << setw(4) << (source == -1 ? 999 : source) << "|";
+            }
+            os << "\nDistances:\n";
+            for (Weight weight : spAll._distances) {
+                os << setw(4) << weight << "|";
             }
             return os;
         }
@@ -84,7 +88,7 @@ namespace Graph {
         using Edge = typename Traits::EdgeType;
         using Weight = typename Traits::WeightType;
         using Node = typename Traits::AdjListNodeType;
-        const Weight INF = std::numeric_limits<double>::max();
+        const Weight INF = std::numeric_limits<Weight>::max();
         
         std::vector<Weight> _distances; // Кратчайшие расстояния из топологического истока в i-ю вершину.
         std::vector<size_t> _sources; // Минимальный остовный лес. Истоки ребер со стоком в i-й вершине.
@@ -129,13 +133,17 @@ namespace Graph {
         
         friend std::ostream& operator<<(std::ostream& os, const SPAllDagMin_T& spAll) {
             using namespace std;
-            os << "SPAllDagMin_T" << endl << "Distances:\n";
-            for (Weight weight : spAll._distances) {
-                os << setw(4) << (weight == spAll.inf_() ? 0 : weight) << " ";
+            os << "SPAllDagMin_T\n";
+            for (size_t i = 0; i < spAll._sources.size(); i++ ) {
+                os << setw(4) << i << "|";
             }
             os << "\nSources\n";
             for (size_t source : spAll._sources) {
                 os << setw(4) << (source == -1 ? 999 : source) << "|";
+            }
+            os << "\nDistances:\n";
+            for (Weight weight : spAll._distances) {
+                os << setw(4) << (weight == spAll.inf_() ? 0 : weight) << " ";
             }
             return os;
         }

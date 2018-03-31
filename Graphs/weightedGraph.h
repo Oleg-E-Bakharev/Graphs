@@ -10,11 +10,16 @@
 #define weightedGraph_h
 
 #include <iostream>
+#include <limits>
 #include "denseGraph.h"
 #include "sparseGraph.h"
 
 namespace Graph {
 
+    // По соглашению, если во взешенном графе ребро имеет нулевой вес, то в матрицу смежности должно заноситься
+    // минимально значащий вес (numeric_limits<Weight>::epsilon()).
+    // Это сделано для того чтобы различать в матрице смежности ребро нулевого веса и отсутствие ребра.
+    
 	template<class Weight>
     struct WeightedAdjListNode;
 	
@@ -93,9 +98,16 @@ template <class T, class C> class for_iter_t <T, C,
 typename enable_if<is_base_of<Graph::WeightedGraphTraits<typename T::value_type>, C>::value>::type> {
     T& t;
     size_t pos;
+    using Weight = typename C::WeightType;
+    const Weight EPS = std::numeric_limits<Weight>::epsilon();
 public:
     for_iter_t(T& t) : t(t), pos(0) { if(!t[pos]) ++*this; }
-    typename C::AdjListNodeType operator*() { return {pos, t[pos]}; }
+    typename C::AdjListNodeType operator*() {
+        Weight w = t[pos];
+        if (std::abs(w) <= EPS) w = 0.; // Поправка на нулевой вес.
+        return {pos, w};
+        
+    }
     bool operator != (const for_iter_t& f) const { assert(&f.t == &t); return pos != t.size(); }
     void operator++() { while(++pos < t.size() && t[pos] == 0); }
 };

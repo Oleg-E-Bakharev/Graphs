@@ -38,6 +38,7 @@ namespace Graph {
         using AdjMatrix = matrix<typename GT::WeightType, GT>;
 		AdjMatrix _adj;
 		size_t _edges = 0;
+        static constexpr typename GT::WeightType EPS = std::numeric_limits<typename GT::WeightType>::epsilon();
         
 	public:
 		using Traits = GT;
@@ -104,8 +105,9 @@ namespace Graph {
 		
 		using AdjMethod = decltype(&DenseGraph_T::adjacent);
 		
-		void reweight(size_t v, const NodeType& node, WeightType weight) {
-			_adj[v][node.dest] = weight;
+		void reweight(size_t v, const NodeType& node, WeightType newWeight) {
+            if (std::abs(newWeight) < EPS) newWeight = EPS;
+			_adj[v][node.dest] = newWeight;
 		}
 	};
 	

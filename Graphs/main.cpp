@@ -387,8 +387,8 @@ int main(int argc, const char * argv[]) {
 //    testDirGraphs();
 //    test_k_neighbourGraph();
 //    testWeightedGraphs();
-    testWeightedDirGraphs();
-//    spAllTest();
+//    testWeightedDirGraphs();
+    spAllTest();
 //    spAllDagTest();
 //    maxFlowTest();
 	

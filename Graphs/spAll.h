@@ -30,6 +30,7 @@ namespace Graph {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Диаметр взвешенного графа. Седжвик 21.3
+    // Возвращает наидлиннейший путь из всех кратчайших путей между всеми парами вершин.
     template <typename G, typename SPAll> class Diameter {
         const G& _g;
         const SPAll& _sp;
@@ -107,7 +108,7 @@ namespace Graph {
                     if (d != 0.) {
                         os << d;
                     } else {
-                        os << "";
+                        os << "0";
                     }
                     os << " ";
                 }
@@ -138,7 +139,7 @@ namespace Graph {
         const Weight INF = std::numeric_limits<double>::max();
         
         const G& _g;
-        matrix<double> _weight; // Веса кратчайшего пти от i к j
+        matrix<double> _weight; // Веса кратчайшего пути от i к j
         matrix<size_t> _next; // Следующее ребро на кратчайшем пути от i к j.
         
         // s-t: ребро графа. i - вершина текущей внешней итерации алгоритма.
@@ -152,7 +153,7 @@ namespace Graph {
     public:
         SPAllFloyd_T (const G& g) : _g(g), _weight(g.size(), g.size(), INF), _next(g.size(), g.size(), -1) {
             for ( size_t i = 0; i < g.size(); i++ ) {
-                for ( const Node& node : g.adjacent(i) ) {
+                for ( Node node : g.adjacent(i) ) {
                     _weight[i][node.dest] = node.weight;
                     _next[i][node.dest] = node.dest;
                 }
@@ -230,13 +231,16 @@ namespace Graph {
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Алгоритм Джонсона с перевзвешиванием графа вычисления всех кратчайших путей за VElog(V).
-	// Алгоритмом Беллмана-Форда вычисляем лес кратчайших Седжвик Лемма 21.25, Рис 21.31-32.
+	// Алгоритмом Беллмана-Форда вычисляем лес кратчайших путей, после чего первзвешиваем
+    // граф чтобы не было отрицательных весов, после чего алгоритмом дейкстры вычисляем кратчайшие пути.
+    // Седжвик Лемма 21.25, Рис 21.31-32.
 	template <class G> class SPAllJohnson_T {
 		using Traits = typename G::Traits;
 		using Edge = typename Traits::EdgeType;
 		using Weight = typename Traits::WeightType;
 		using Node = typename Traits::AdjListNodeType;
-		const Weight INF = std::numeric_limits<double>::max();
+		const Weight INF = std::numeric_limits<Weight>::max();
+        const Weight EPS = std::numeric_limits<Weight>::epsilon();
 
 		using SptBF = SptBFAdvanced_T<G>;
 		
@@ -246,7 +250,9 @@ namespace Graph {
 		void reweight_(SptBF& bf) {
 			for (size_t v = 0; v < _g.size(); v++) {
 				for( const Node& n : _g.adjacent(v)) {
-					_g.reweight(v, n, n.weight + bf.distance(v) - bf.distance(n.dest) + std::numeric_limits<double>::epsilon());
+                    Weight newWeight = n.weight + bf.distance(v) - bf.distance(n.dest);
+                    assert(newWeight >= 0.);
+					_g.reweight(v, n, newWeight);
 				}
 			}
 		}
@@ -279,11 +285,8 @@ namespace Graph {
 		
 		friend std::ostream& operator<<(std::ostream& os, const SPAllJohnson_T& spAll) {
 			using namespace std;
-			os << "SPAllJohnson\n";
-			if (spAll._fail) {
-				os << "Negative cycles detected\n";
-				return os;
-			}
+			os << "\nSPAllJohnson\n";
+			if (spAll._fail) return os << "Negative cycles detected\n";
 			cout << "Reweighted graph:\n" << spAll._g;
 			cout << *spAll._spAll;
 			return os;
