@@ -13,10 +13,10 @@ using namespace std;
 
 void testSparseMatrix()
 {
-    SparseMatrix<int> m{
+    SparseMatrix<int> m {
         {1, 2, 3},
         {4, 5, 6},
-        {7, 8, 9}};
+        {7, 8, 9} };
 
     cout << m;
     
