@@ -20,7 +20,7 @@
 using namespace std;
 
 // А-ля Страуструп: http://www.stroustrup.com/matrix.c
-template<typename T, typename Container, typename Context = void> class basic_slice_iter {
+template<typename Container, typename Context = void> class basic_slice_iter {
 	typedef Container VT;
 	VT& v;
 	slice s;
@@ -28,7 +28,7 @@ template<typename T, typename Container, typename Context = void> class basic_sl
 	typename VT::reference ref(size_t i) const { return (v)[s.start() + i * s.stride()]; }
     friend class for_iter_t<basic_slice_iter, Context>;
 public:
-	typedef T value_type;
+    using value_type = typename Container::value_type;
 	typedef typename VT::reference reference;
 	typedef typename VT::const_reference const_reference;
 	basic_slice_iter( VT& v, slice s ) : v(v), s(s) {}
@@ -50,7 +50,7 @@ public:
     for_iter_t<basic_slice_iter, Context> end() const { return for_iter_t<basic_slice_iter, Context>(*this); }
     
     // Вывод в поток
-    friend std::ostream& operator << (std::ostream& os, const basic_slice_iter<T, Container, Context>& v) {
+    friend std::ostream& operator << (std::ostream& os, const basic_slice_iter<Container, Context>& v) {
         for (auto x : v ) {
             os << setw(2) << x << ", ";
         }
@@ -59,17 +59,18 @@ public:
 };
 
 template <typename T, typename Context = void>
-using slice_iter = basic_slice_iter<T, std::vector<T>, Context>;
+using slice_iter = basic_slice_iter<std::vector<T>, Context>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, typename Container, typename Context = void>
+template <typename Container, typename Context = void>
 class basic_matrix {
 	size_t _h;
     size_t _w;
 	Container _m;
 	
 public:
-	using vec = basic_slice_iter<T, Container, Context>;
+    using T = typename Container::value_type;
+	using vec = basic_slice_iter<Container, Context>;
 	using value_type = vec;
 	using reference = vec; // vec это и value_type и reference.
 	using const_reference = const vec;
@@ -114,7 +115,7 @@ public:
     for_iter_t<const basic_matrix> end() const { return for_iter(*this); }
 	
 	// Вывод в поток
-	friend std::ostream& operator << (std::ostream& os, const basic_matrix<T, Container, Context>& m) {
+	friend std::ostream& operator << (std::ostream& os, const basic_matrix<Container, Context>& m) {
 		for( auto row : m ) {
             os << row;
 		}
@@ -125,6 +126,6 @@ public:
 };
 
 template <typename T, typename Context = void>
-using matrix = basic_matrix<T, std::vector<T>, Context>;
+using matrix = basic_matrix<std::vector<T>, Context>;
 
 #endif /* matrix_h */

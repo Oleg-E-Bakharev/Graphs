@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <algorithm>
 #include <functional>
+#include <map>
 
 // Разреженный массив на основе хэш таблицы с открытой адресацией.
 // Можно использовать как будто массив изначально заполнен значениями по умолчанию для хранимого типа,
@@ -223,7 +224,8 @@ template <typename T> class SparseArray {
 	};
 	
 public:
-    using value_type = Item;
+    using value_type = T;
+    using item_tyoe = Item;
 	using iterator = Iterator;
 	using reference = Reference;
     using const_reference = Reference;

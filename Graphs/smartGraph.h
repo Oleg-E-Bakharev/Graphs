@@ -20,10 +20,15 @@
  под slice-итератор строки матрицы.
  */
 
-// Специализация for_iter_t для итерации по смежным вершинам.
+// Специализация for_iter_t для итерации по смежным вершинам графа, заданного разреженной матрицей.
 // Для контекстов, WeightType которых есть bool.
+// Т - контенер. C - контекст.
 template <class T, class C> class for_iter_t <T, C,
-typename enable_if<is_same<typename C::WeightType, bool>::value>::type> {
+typename enable_if<
+        is_same<typename T
+        is_same<typename C::WeightType, bool>::value
+    >::type>
+{
     T& t;
     size_t pos;
 public:

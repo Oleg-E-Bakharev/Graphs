@@ -11,21 +11,21 @@
 
 // Универсальный итератор, который преобразовывает любой random-access-iterable класс в sequence-iterable-class
 // Для использования в range-based for
-// Для использования T должен поддерживать [size_t] и size()
+// Для использования Collection должен поддерживать [size_t] и size()
 // А также тип reference как ссылка на хранимый тип.
 // Через контекст можно специализировать итератор для специальных целей (напр в матрице смежности графа).
-template <typename T, typename Context = void, typename Enable = void> class for_iter_t {
-    T& t;
-    size_t pos;
+template <typename Collection, typename Context = void, typename Enable = void> class for_iter_t {
+    Collection& _col;
+    size_t _pos;
 public:
     // const_cast - для возможности работать и с константными и с неконстантными итераторами.
-    for_iter_t(const T& t) : t(const_cast<T&>(t)), pos(0) {}
-    typename T::reference operator*() { return t[pos]; }
-    bool operator != (const for_iter_t& f) const { assert(&f.t == &t); return pos != t.size(); }
-    void operator++() { ++pos; }
+    for_iter_t(const Collection& col) : _col(const_cast<Collection&>(col)), _pos(0) {}
+    typename Collection::reference operator*() { return _col[_pos]; }
+    bool operator != (const for_iter_t& f) const { assert(&f._col == &_col); return _pos != _col.size(); }
+    void operator++() { ++_pos; }
 };
 
 // Функция для инстанциирования for_iter_t чтобы параметр шаблона вывелся компилятором.
-template<class T> for_iter_t<T> for_iter(T& t) { return for_iter_t<T>(t); };
+template<class Collection> for_iter_t<Collection> for_iter(Collection& col) { return for_iter_t<Collection>(col); };
 
 #endif /* for_iter_h */

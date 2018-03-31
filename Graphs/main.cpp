@@ -382,13 +382,13 @@ void test_k_neighbourGraph() {
 int main(int argc, const char * argv[]) {
 //    testBrisgesJoints();
 //    testSparseArray();
-//    testSparseMatrix();
+    testSparseMatrix();
 //   testGraphs();
 //    testDirGraphs();
 //    test_k_neighbourGraph();
 //    testWeightedGraphs();
 //    testWeightedDirGraphs();
-    spAllTest();
+//    spAllTest();
 //    spAllDagTest();
 //    maxFlowTest();
 	
