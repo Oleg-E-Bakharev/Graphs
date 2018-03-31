@@ -11,10 +11,10 @@
 
 using namespace std;
 
-std::ostream& operator << (std::ostream& os, const SparseArray<wchar_t>::value_type& it) {
-    // Для упрощения в вывод отладочной консоли.
-    return os << "{" << char(it.first) << ", " << it.second << "}";
-}
+//std::ostream& operator << (std::ostream& os, const SparseArray<wchar_t>::value_type& it) {
+//    // Для упрощения в вывод отладочной консоли.
+//    return os << "{" << char(it.first) << ", " << it.second << "}";
+//}
 
 void testSparseArray()
 {
