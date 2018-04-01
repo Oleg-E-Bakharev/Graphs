@@ -21,20 +21,19 @@ using namespace std;
 
 // А-ля Страуструп: http://www.stroustrup.com/matrix.c
 template<typename Container, typename Context = void> class basic_slice_iter {
-	typedef Container VT;
-	VT& v;
+	Container& v;
 	slice s;
 	// Вместо T& используем typename vector<T>::reference для совместимости с vector<bool>
-	typename VT::reference ref(size_t i) const { return (v)[s.start() + i * s.stride()]; }
+	typename Container::reference ref(size_t i) const { return (v)[s.start() + i * s.stride()]; }
     friend class for_iter_t<basic_slice_iter, Context>;
 public:
     using value_type = typename Container::value_type;
-	typedef typename VT::reference reference;
-	typedef typename VT::const_reference const_reference;
-	basic_slice_iter( VT& v, slice s ) : v(v), s(s) {}
+	typedef typename Container::reference reference;
+	typedef typename Container::const_reference const_reference;
+	basic_slice_iter(Container& v, slice s) : v(v), s(s) {}
 	
 	// Заменитель конструктора для константных экземпляров. Обычный конструктор "возвратил бы" не const итератор.
-	static const basic_slice_iter ct(const VT& v, slice s) { return basic_slice_iter( const_cast<VT&>(v), s ); }
+	static const basic_slice_iter ct(const Container& v, slice s) { return basic_slice_iter( const_cast<Container&>(v), s ); }
 	
 	size_t size() const { return s.size(); }
 	const_reference operator[](size_t i) const { return ref(i); }
@@ -58,6 +57,7 @@ public:
     }
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T, typename Context = void>
 using slice_iter = basic_slice_iter<std::vector<T>, Context>;
 

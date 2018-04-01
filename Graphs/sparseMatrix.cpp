@@ -13,26 +13,36 @@ using namespace std;
 
 void testSparseMatrix()
 {
-    SparseMatrix<int> m {
+//    matrix<int> m {
+//        {1, 2, 3},
+//        {4, 5, 6},
+//        {7, 8, 9} };
+//    
+//    cout << m;
+    
+    SparseMatrix<int> sm {
         {1, 2, 3},
         {4, 5, 6},
         {7, 8, 9} };
 
-    cout << m;
+    cout << sm;
     
-    m[1][1] = 10;
+    sm[1][1] = 10;
     
-    cout << m;
+    cout << sm;
     
-    SparseMatrix<int> sm(20, 20);
+    SparseMatrix<int> sm2(20, 20);
     default_random_engine gen(random_device{}());
     uniform_int_distribution<> dis(0, 20);
     for(int i = 0; i < 30; i++) {
         size_t j = dis(gen);
         size_t k = dis(gen);
-        if (i != j) {
-            sm[j][k] = 1;
+        if (j != k) {
+            sm2[j][k] = i;
         }
     }
-    cout << sm;
+    
+    sm2[0][0] = 100;
+
+    cout << sm2;
 }

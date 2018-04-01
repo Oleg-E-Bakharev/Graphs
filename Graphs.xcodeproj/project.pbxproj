@@ -28,6 +28,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7C2B3A19207020DD002A6EBC /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Event.h; path = ../../SmartTypes/SmartTypes/Event.h; sourceTree = "<group>"; };
 		7C692C0B2027CF8500529D85 /* sparseMatrix.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sparseMatrix.cpp; sourceTree = "<group>"; };
 		7C692C0C2027CF8500529D85 /* sparseMatrix.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sparseMatrix.hpp; sourceTree = "<group>"; };
 		7C791DAF1CBB00AE005300DC /* searchGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchGraph.h; sourceTree = "<group>"; };
@@ -88,6 +89,7 @@
 		C349526B1CB5645900775030 /* Graphs */ = {
 			isa = PBXGroup;
 			children = (
+				7C2B3A19207020DD002A6EBC /* Event.h */,
 				C30CC58D1CCBDF3E003E7B6E /* debug.h */,
 				C34952781CB7BC7600775030 /* for_iter.h */,
 				7C7E4AA220277D9700347B53 /* sparseArray.hpp */,

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
+#include "Event.h"
 
 // Разреженный массив на основе хэш таблицы с открытой адресацией.
 // Можно использовать как будто массив изначально заполнен значениями по умолчанию для хранимого типа,
@@ -46,6 +47,7 @@ template <typename T> class SparseArray {
     class Data {
         std::vector<Item> _data; // Массив данных.
         std::vector<bool> _status; // Флаги занятости ячеек _data.
+        SparseArray& _owner; // Владелец обёекта.
         
         using References = std::vector<std::reference_wrapper<Item>> ;
         References _refs;// Cсылки на элементы _data в отсортированном порядке.
@@ -75,6 +77,7 @@ template <typename T> class SparseArray {
             if (!_fixed) {
                 std::sort(_refs.begin(), _refs.end(), std::less<Item>());
                 _fixed = true;
+                _owner.order_did_fix();
             }
         }
         
@@ -83,10 +86,14 @@ template <typename T> class SparseArray {
         void operator=(const Data&) = delete;
         
     public:
-        Data(size_t size) : _data(tableSize_(size << 1)), _status(_data.size()) {}
+        Data(size_t size, SparseArray& owner) : _data(tableSize_(size << 1)), _status(_data.size()), _owner(owner) {}
         
         // Разрешаем перемещение.
-        Data(Data&& d) : _data(std::move(d._data)), _status(std::move(d._status)), _refs(std::move(d._refs)), _fixed(d._fixed)
+        Data(Data&& d) : _data(std::move(d._data)),
+                         _status(std::move(d._status)),
+                         _refs(std::move(d._refs)),
+                         _fixed(d._fixed),
+                         _owner(d._owner)
         {
         }
 
@@ -110,7 +117,10 @@ template <typename T> class SparseArray {
                 }
             }
             assert(_refs.size() <= _data.size() >> 1);
-            _fixed = false;
+            if (_fixed) {
+                _fixed = false;
+                _owner.order_did_reset();
+            }
             _data[i] = {pos, t};
             _status[i] = true;
             _refs.push_back(_data[i]);
@@ -139,7 +149,7 @@ template <typename T> class SparseArray {
         
         // Возвращает заполненный своей копией буфер с вдвое увеличенным размером.
         Data grow() {
-            Data data(_data.size());
+            Data data(_data.size(), _owner);
             // В данном случае нам не важен порядок ссылок, поэтому не вызываем fix_()
             for (auto i = _refs.begin(); i != _refs.end(); ++i) {
                 Item& item = *i;
@@ -225,12 +235,15 @@ template <typename T> class SparseArray {
 	
 public:
     using value_type = T;
-    using item_tyoe = Item;
+    using item_type = Item;
 	using iterator = Iterator;
 	using reference = Reference;
     using const_reference = Reference;
+    
+    event<SparseArray> order_did_reset;
+    event<SparseArray> order_did_fix;
 
-	SparseArray(size_t size = 0) : _data(0) {} // Не инициализируем хранилище реальным размером.
+	SparseArray(size_t size = 0) : _data(0, *this) {} // Не инициализируем хранилище реальным размером.
 	
 	// Количество используемых элементов.
     size_t size() const { return _data.size(); }
@@ -243,7 +256,7 @@ public:
 	
 	// Конечный итератор.
     iterator end() { return _data.end(); }
-    
+
     friend std::ostream& operator<< (std::ostream& os, const SparseArray<T>& sa) {
         os << "Count:" << sa.size() << " Output: {char:count}\n";
         for (auto& it : const_cast<SparseArray<T>&>(sa)) {
