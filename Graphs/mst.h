@@ -33,6 +33,20 @@ namespace Graph {
         // node.dest есть наоборот - исток ребра минимального пути.
         // node.weight вес пути до индексной точки.
         std::vector<Node> _mst;
+        std::vector<Edge> _mstFinal;
+        
+        void calcMstFinal_() {
+            // Превращаем _mst<Node> в _mstFinal<Edge>
+            _mstFinal.reserve(_mst.size());
+            for (size_t w = 0; w < _mst.size(); w++) {
+                const Node& n = _mst[w];
+                if (n.dest != -1) {
+                    // Выставляем правильное направление ребра (актуально для направленных графов).
+                    _mstFinal.push_back({n.dest, {w, n.weight}});
+                }
+            }
+            _mst.clear();
+        }
         
         // Priority-first search.
         void pfs_(size_t v) {
@@ -70,6 +84,8 @@ namespace Graph {
                     }
                 }
             }
+            
+            calcMstFinal_();
         }
         
     public:
@@ -83,26 +99,19 @@ namespace Graph {
             }
         }
         
-        std::vector<Edge> mst() const {
-            std::vector<Edge> mst;
-            for (size_t w = 0; w < _mst.size(); w++) {
-                const Node& n = _mst[w];
-                if (n.dest != -1) {
-                    // Выставляем правильное направление ребра (актуально для направленных графов).
-                    mst.push_back({n.dest, {w, n.weight}});
-                }
-            }
-            return mst;
+        const std::vector<Edge>& mst() const {
+            return _mstFinal;
         }
         
         friend std::ostream& operator<<(std::ostream& os, const MstPrim_T& m) {
             auto mst = m.mst();
-            os << "MstPrim\n";
+            os << "\nMstPrim\n";
+            Weight wt = 0;
             for (const auto& e : mst) {
                 os << e << "\n";
+                wt += e.weight;
             }
-            os << "\n";
-            return os;
+            return os << "MST weight: " << wt << "\n";
         }
     };
     
@@ -114,6 +123,7 @@ namespace Graph {
     // Minimal Spanning Tree (MST) Седжвик 20.4 O(E*lg(E))
     template<typename G> class MstKrus_T {
         using Edge = typename G::Traits::EdgeType;
+        using Weight = typename G::Traits::WeightType;
         
         const G& _g;
         std::vector<Edge> _mst; // MST.
@@ -121,14 +131,13 @@ namespace Graph {
     public:
         MstKrus_T(const G& g) : _g(g)
         {
-            size_t edgesCount = g.edgesCount();
             DisjointSet cc(g.size()); // Лес компонент связности.
 			
 			// Накопитель ребер.
             std::vector<Edge> storage(edges(g));
-            _mst.reserve(edgesCount);
+            _mst.reserve(g.size());
 
-            // Сортируем ребра по возрастания веса.
+            // Сортируем ребра по возрастанию веса.
             std::sort(storage.begin(), storage.end(), WeightLess<Edge>());
             
             for (const Edge& e : storage) {
@@ -139,23 +148,109 @@ namespace Graph {
             }
         }
         
-        std::vector<Edge> mst() const {
+        const std::vector<Edge>& mst() const {
             return _mst;
         }
         
         friend std::ostream& operator<<(std::ostream& os, const MstKrus_T& m) {
             auto mst = m.mst();
-            os << "MstKrus\n";
+            os << "\nMstKrus\n";
+            Weight wt = 0;
             for (const auto& e : mst) {
                 os << e << "\n";
+                wt += e.weight;
             }
-            os << "\n";
+            return os << "MST weight: " << wt << "\n";
             return os;
         }
     };
     
     // Ускоритель вызова
     template<typename G> MstKrus_T<G> mstKrus(const G& g) { return {g}; }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Алгоритм Борувки построения Минимального Остовного Дерева (МОД)
+    // Minimal Spanning Tree (MST) Седжвик 20.5 O(E*lg(E)*lg(V))
+    /*
+     Изначально, пусть T — пустое множество рёбер (представляющее собой остовный лес, в который каждая вершина входит в
+     качестве отдельного дерева).
+     Для каждой компоненты связности (то есть, дерева в остовном лесе) в подграфе с рёбрами T, найдём самое дешёвое
+     ребро, связывающее эту компоненту с некоторой другой компонентой связности. (Предполагается, что веса рёбер
+     различны, или как-то дополнительно упорядочены так, чтобы всегда можно было найти единственное ребро с минимальным
+     весом).
+     Добавим все найденные рёбра в множество T.
+    */
+    template<typename G> class MstBoruvka_T {
+        using Edge = typename G::Traits::EdgeType;
+        using Weight = typename G::Traits::WeightType;
+        
+        const G& _g;
+        std::vector<Edge> _mst; // MST.
+        
+    public:
+        MstBoruvka_T(const G& g) : _g(g)
+        {
+            _mst.reserve(g.size());
+            const std::vector<Edge> edges(::Graph::edges(g));
+            
+            // Индексы рёбер, еще не отвергнутых и не включённых в MST.
+            std::vector<size_t> active;
+            active.reserve(edges.size());
+            for (size_t i = 0; i < edges.size(); i++) active.push_back(i);
+            
+            std::vector<size_t> nearest; // Ближайший сосед к компоненте, указанной индексом.
+            DisjointSet cc(g.size()); // Лес компонент связности.
+            
+            // lg(E) потому что на каждой следующей итерации |edges| уменьшается вдвое.
+            for	(size_t i = active.size(), next = 0; i != 0; i = next) {
+                next = 0;
+                // 1. Строим вектор ближайших соседей.
+                nearest.assign(g.size(), 0);
+                for (size_t j = 0; j < i; j++) {
+                    size_t k = active[j]; // индекс текущего ребра.
+                    const Edge& e = edges[k];
+                    
+                    // Сравниваем
+                    size_t ccV = cc.find(e.v);
+                    size_t ccW = cc.find(e.w);
+                    if (ccV == ccW) {
+                        continue; // За счёт этого |edges| уменьшается вдвое на каждом шаге.
+                    }
+                    if (!nearest[ccV] || e.weight < edges[nearest[ccV]].weight ) nearest[ccV] = k;
+                    if (!nearest[ccW] || e.weight < edges[nearest[ccW]].weight ) nearest[ccW] = k;
+                    active[next++] = k;
+                }
+                
+                // 2. Добавляем ближайших соседей в MST.
+                for (size_t j = 0; j < g.size(); j++) {
+                    if (nearest[j] != 0) {
+                        const Edge& e = edges[nearest[j]];
+                        if (cc.uniteIfNotConnected(e.v, e.w)) {
+                            _mst.push_back(e);
+                        }
+                    }
+                }
+            }
+        }
+        
+        const std::vector<Edge>& mst() const {
+            return _mst;
+        }
+        
+        friend std::ostream& operator<<(std::ostream& os, const MstBoruvka_T& m) {
+            auto mst = m.mst();
+            os << "\nMstBoruvka\n";
+            Weight wt = 0;
+            for (const auto& e : mst) {
+                os << e << "\n";
+                wt += e.weight;
+            }
+            return os << "MST weight: " << wt << "\n";
+        }
+    };
+    
+    // Ускоритель вызова
+    template<typename G> MstBoruvka_T<G> mstBoruvka(const G& g) { return {g}; }
 }
 
 #endif /* mst_h */

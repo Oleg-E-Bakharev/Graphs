@@ -314,14 +314,17 @@ template <class G> void testWeightedGraph(G& g) {
     auto krus = mstKrus(g);
     cout << krus;
 
-    auto dijkstra = sptDijkstra(g, 0);
-    cout << dijkstra;
-	
-    auto bfNaive = sptBFNaive(g, 0);
-    cout << bfNaive;
-    
-    auto bfAdvanced = sptBFAdvanced(g, 0);
-    cout << bfAdvanced;
+    auto boruvka = mstBoruvka(g);
+    cout << boruvka;
+
+//    auto dijkstra = sptDijkstra(g, 0);
+//    cout << dijkstra;
+//
+//    auto bfNaive = sptBFNaive(g, 0);
+//    cout << bfNaive;
+//
+//    auto bfAdvanced = sptBFAdvanced(g, 0);
+//    cout << bfAdvanced;
 }
 
 void testDenseWeightedGraph() {
@@ -382,11 +385,11 @@ void test_k_neighbourGraph() {
 int main(int argc, const char * argv[]) {
 //    testBrisgesJoints();
 //    testSparseArray();
-    testSparseMatrix();
+//    testSparseMatrix();
 //   testGraphs();
 //    testDirGraphs();
 //    test_k_neighbourGraph();
-//    testWeightedGraphs();
+    testWeightedGraphs();
 //    testWeightedDirGraphs();
 //    spAllTest();
 //    spAllDagTest();

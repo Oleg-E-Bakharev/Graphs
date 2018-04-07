@@ -138,7 +138,6 @@ class basic_matrix<SparseArray<T>, Context> {
     offset_function rowOffset(size_t col) const {
         return [this, col] {
             return this->_lowerRow[col];
-            
         };
     }
     
@@ -172,7 +171,6 @@ public:
     size_t w() const { return _w; }
     size_t h() const { return _h; }
     
-    // TODO Здесь должны быть обычные слайсы для вставки.
     vec col(size_t x) { return vec( _m, slice(x, _h, _w), rowOffset(x) ); }
     const vec col(size_t x) const { return vec::ct( _m, slice(x, _h, _w), rowOffset(x) ); }
     
