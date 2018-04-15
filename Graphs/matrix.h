@@ -21,15 +21,16 @@ using namespace std;
 
 // А-ля Страуструп: http://www.stroustrup.com/matrix.c
 template<typename Container, typename Context = void> class basic_slice_iter {
+    using ForIter = for_iter_t<basic_slice_iter, Context>;
 	Container& v;
 	slice s;
 	// Вместо T& используем typename vector<T>::reference для совместимости с vector<bool>
 	typename Container::reference ref(size_t i) const { return (v)[s.start() + i * s.stride()]; }
-    friend class for_iter_t<basic_slice_iter, Context>;
+    friend ForIter;
 public:
     using value_type = typename Container::value_type;
-	typedef typename Container::reference reference;
-	typedef typename Container::const_reference const_reference;
+	using reference = typename Container::reference;
+	using const_reference = typename Container::const_reference;
 	basic_slice_iter(Container& v, slice s) : v(v), s(s) {}
 	
 	// Заменитель конструктора для константных экземпляров. Обычный конструктор "возвратил бы" не const итератор.
@@ -43,11 +44,11 @@ public:
     size_t upper_index() const { return s.start() + s.size() * s.stride(); }
 	
 	// Для for(:)
-    for_iter_t<basic_slice_iter, Context> begin() { return for_iter_t<basic_slice_iter, Context>(*this); }
-    for_iter_t<basic_slice_iter, Context> end() { return for_iter_t<basic_slice_iter, Context>(*this); }
-    for_iter_t<basic_slice_iter, Context> begin() const { return for_iter_t<basic_slice_iter, Context>(*this); }
-    for_iter_t<basic_slice_iter, Context> end() const { return for_iter_t<basic_slice_iter, Context>(*this); }
-    
+    ForIter begin() { return {*this}; }
+    ForIter end() { return {*this}; }
+    ForIter begin() const { return {*this}; }
+    ForIter end() const { return {*this}; }
+
     // Вывод в поток
     friend std::ostream& operator << (std::ostream& os, const basic_slice_iter<Container, Context>& v) {
         for (auto x : v ) {

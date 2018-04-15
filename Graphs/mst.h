@@ -36,7 +36,7 @@ namespace Graph {
         std::vector<Edge> _mstFinal;
         
         void calcMstFinal_() {
-            // Превращаем _mst<Node> в _mstFinal<Edge>
+            // Превращаем _mst<Node> в _mstFinal<Edge> O(V)
             _mstFinal.reserve(_mst.size());
             for (size_t w = 0; w < _mst.size(); w++) {
                 const Node& n = _mst[w];
@@ -92,7 +92,7 @@ namespace Graph {
         MstPrim_T(const G& g) : _g(g), _used(g.size(), false),
             _mst(g.size(), {size_t(-1), std::numeric_limits<double>::max()})
         {
-            for (size_t v = 0; v < g.size(); v++) {
+            for (size_t v = 0; v < g.size(); v++) { // O((V+E)lg(V))
                 if (!_used[v]) {
                     pfs_(v);
                 }
@@ -120,7 +120,9 @@ namespace Graph {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Алгоритм Крускала построения Минимального Остовного Дерева (МОД)
-    // Minimal Spanning Tree (MST) Седжвик 20.4 O(E*lg(E))
+    // Minimal Spanning Tree (MST) Седжвик 20.4 O(E+X*lg(V))
+    // X - количество ребер не превосходящих по длине самое длинное ребро MST.
+    // lg(V) ~ lg(E) потому что maxE = V^2 => lg(maxE) = 2*lg(V).
     template<typename G> class MstKrus_T {
         using Edge = typename G::Traits::EdgeType;
         using Weight = typename G::Traits::WeightType;
@@ -137,14 +139,17 @@ namespace Graph {
             std::vector<Edge> storage(edges(g));
             _mst.reserve(g.size());
 
-            // Сортируем ребра по возрастанию веса.
-            std::sort(storage.begin(), storage.end(), WeightLess<Edge>());
+            // Строим кучу из рёбер.
+            std::make_heap(storage.begin(), storage.end(), WeightGreater<Edge>()); // O(E)
             
-            for (const Edge& e : storage) {
+            for (size_t i = 0; i <= g.size(); i++) {
+                pop_heap(storage.begin(), storage.end(), WeightGreater<Edge>()); // O(lgE)
+                const Edge& e = storage.back();
                 // Если вершины ребра не образуют цикл, добавляем ребро в mst.
-                if (cc.uniteIfNotConnected( e.v, e.w)) {
+                if (cc.uniteIfNotConnected( e.v, e.w)) { // O(1)
                     _mst.push_back(e);
                 }
+                storage.pop_back();
             }
         }
         
@@ -154,7 +159,7 @@ namespace Graph {
         
         friend std::ostream& operator<<(std::ostream& os, const MstKrus_T& m) {
             auto mst = m.mst();
-            os << "\nMstKrus\n";
+            os << "\nMstKruscal\n";
             Weight wt = 0;
             for (const auto& e : mst) {
                 os << e << "\n";
@@ -170,7 +175,7 @@ namespace Graph {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Алгоритм Борувки построения Минимального Остовного Дерева (МОД)
-    // Minimal Spanning Tree (MST) Седжвик 20.5 O(E*lg(E)*lg(V))
+    // Minimal Spanning Tree (MST) Седжвик 20.5 O(E*lg(V))
     /*
      Изначально, пусть T — пустое множество рёбер (представляющее собой остовный лес, в который каждая вершина входит в
      качестве отдельного дерева).

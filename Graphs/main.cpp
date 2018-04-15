@@ -389,11 +389,11 @@ int main(int argc, const char * argv[]) {
 //   testGraphs();
 //    testDirGraphs();
 //    test_k_neighbourGraph();
-    testWeightedGraphs();
+//    testWeightedGraphs();
 //    testWeightedDirGraphs();
 //    spAllTest();
 //    spAllDagTest();
-//    maxFlowTest();
+    maxFlowTest();
 	
     return 0;
 }

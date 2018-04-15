@@ -27,15 +27,15 @@ void maxFlowTest()
 	});
 	
 	auto mfFF = maxFlowFF(net, 0, 5);
-	cout << "Max Flow Ford-Fulkerson: " << mfFF() << "\nMinCut:\n";
-	for (auto& edge : mfFF.minCut()) {
+	cout << "Max Flow Ford-Fulkerson: " << mfFF() << "\nMinCutSet:\n";
+	for (auto& edge : mfFF.minCutSet()) {
 		cout << edge << endl;
 	}
 	cout << endl;
 	
     auto mfPP = maxFlowPP(net, 0, 5);
 	cout << "Max Flow Preflow-Push: " << mfPP() << "\nMinCut:\n";
-	for (auto& edge : mfPP.minCut()) {
+	for (auto& edge : mfPP.minCutSet()) {
 		cout << edge << endl;
 	}
     
@@ -43,7 +43,7 @@ void maxFlowTest()
     
     auto mfD = maxFlowD(net, 0, 5);
     cout << "Max Flow Dinic: " << mfPP() << "\nMinCut:\n";
-    for (auto& edge : mfD.minCut()) {
+    for (auto& edge : mfD.minCutSet()) {
         cout << edge << endl;
     }
 

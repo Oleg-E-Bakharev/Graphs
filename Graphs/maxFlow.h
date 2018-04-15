@@ -22,13 +22,49 @@
 #include "weightedGraph.h"
 
 namespace Graph {
+    
+    /*
+     Определения из Седжвика.
+     Опр.22.1. Сеть с вершиной s, выбранной в качестве истока и вершиной t, выбранной в качестве стока, называется
+     st-сетью.
+     
+     Опр.22.2. Транспортная сеть (flow network) - это st-сеть с положительными весами рёбер, которые мы будем называть
+     пропускными способностями (capacity). Поток (flow) в транспортной сети - это множество неотрицательных весов рёбер
+     которые называются рёберными потоками (edge flow) и удовлетворяют условиям: поток в любом ребре не превышает
+     пропускную способность этого ребра, а суммарный поток, входящий в каждую внутреннюю вершину (приток вершины), равен
+     суммарному потоку исходящему из этой вершины (отток вершины).
+     
+     Лемма 22.1. Любой st-поток обладает тем свойством, что отток из вершины s равен притоку в вершину t.
+     
+     Следствие: Величина потока объединения двух множеств вершин равна сумме величин каждого потока этих двух множеств
+     минус сумма весов рёбер, соединяющих вершину одного множества с вершиной другого.
+     
+     Опр. Сечение или разрез (cut) графа есть разбиение множества вершин графа на два непересекающихся подмножества, а
+     перекрестное ребро (crossing edge) - это ребро соединяющее вершину одного подмнодества, с вергиной другого.
+     
+     Опр. 22.3. st-сечение - это сечение, которое помещает вершину s в одно из подмножеств, а вершину t в другое.
+     
+     Лемма 22.3. Для любого st-потока поток через произворльное st-сечение равен величине всего потока.
+     
+     Лемма 22.4. Величина st-потока не может превышать пропускной способности любого st-сечения.
+     
+     Лемма 22.5. (Теорема о максимальном потоке и минимальном сечении). Максимальный поток из всех st-потоков в сети
+     равен минимальной пропускной способности из всех st-сечений.
+     
+     Опр. 22.4. Пусть задана транспортная сеть и поток в ней. Остаточная сеть (residual network) для данного потока
+     содержит те же вершины, что и исходная сеть, и одно или два ребра на каждое ребро исходной сети, которые
+     определяются следующим образом: Пусть f-поток, а c - пропускная способность произвольного ребра v-w из исходной
+     сетис. Если f положительно, то в остаточную сеть включается ребро w-v пропускной способностью f (обратное ребро);
+     и если f < c, то в остаточную сеть включается ребро v-w (прямое ребро) c пропускной способностью c-f.
+     */
 	
-    // "вес" ребра остаточной сети.
+    // "вес" ребра остаточной сети (ОС).
     class ResidualInfo {
         size_t _from; // Исходная вершина ребра.
         int _capacity; // Ёмкость ребра.
         int _flow; // Поток ребра.
         
+        // Возвращает true если v соотвтетсвует истоку ребра ОС.
         bool from_(size_t v) const { return _from == v; }
     public:
         ResidualInfo(size_t from, int capacity):_from(from), _capacity(capacity), _flow(0) {}
@@ -37,17 +73,16 @@ namespace Graph {
         void addFlowTo(size_t v, int f) { _flow += from_(v) ? -f : +f; }
         
         // Сравнение по ссылке.
-        bool isSame( const ResidualInfo& ri) const { return this == &ri; }
+        bool isSame(const ResidualInfo& ri) const { return this == &ri; }
         
         friend std::ostream& operator<< (std::ostream& os, const ResidualInfo& ri) {
-            os << ri._flow << "/" << ri._capacity;
-            return os;
+            return os << ri._flow << "/" << ri._capacity;
         }
     };
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Построение минимального сечения (разреза) (min-cut) графа из истока s в сток t на основе информации о заполненой
-	// до максимального потока остаточной сети.
+	// Построение секущего множества (cut set) минимального сечения (разреза) (min cut) графа из истока s в сток t на
+    // основе информации о заполненой до максимального потока остаточной сети.
 	// g - исходная сеть, rg - заполненая остаточная сеть.
 	// s - исток, t - сток.
 	// В заполненой до максимального потока остаточной сети отсутствует пути в сток.
@@ -55,41 +90,40 @@ namespace Graph {
 	// Все ребра из вершин S исходного графа не ведущие в S будут составлять минимальный разрез исходного рафа G
 	// межу вершинами s и t.
 	template<class G, class RG>
-	class MinCut_T {
+	class MinCutSet_T {
 		using Edge = typename G::Edge;
 		
-		const G& _g;
-		const RG& _rg;
-		DisjointSet _rs; // Множество достижимости (Reachability set) из истока.
-		std::vector<Edge> _minCut;
+		std::vector<Edge> _minCutSet;
 		
 		// Построение множества достижимости из стока по остаточной сети.
-		void buildReachabilitySet_(size_t s) {
-			// Проходим BFS-ом по _rg и заносим вершины в _rs.
+        DisjointSet buildReachabilitySet_(const RG& rg, size_t s) {
+			// Проходим BFS-ом по rg и заносим вершины в rs.
+            DisjointSet rs(rg.size()); // Множество достижимости (Reachability set) из истока.
 			std::queue<size_t> bfs;
 			bfs.push(s);
 			while (!bfs.empty()) {
 				size_t v = bfs.front(); bfs.pop();
-				for (auto& node : _rg.adjacent(v)) {
+				for (auto& node : rg.adjacent(v)) {
 					size_t w = node.dest;
 					ResidualInfo& ri = node.weight;
-					if ( !_rs.isConnected(s, w) && ri.residualCapacityTo(w) > 0) {
+					if ( !rs.isConnected(s, w) && ri.residualCapacityTo(w) > 0) {
 						bfs.push(w);
-						_rs.uniteIfNotConnected(v, w);
+						rs.uniteIfNotConnected(v, w);
 					}
 				}
 			}
+            return rs;
 		}
 		
 		// Построение минимального разреза исходной сети проходом по вершинам множества достижимости остаточной сети и
 		// собиая ребра, которые идут в вершины исходной сети и отсутствующие в множестве достижимости остаточной сети.
-		void buildMinCut_(size_t s) {
-			for (size_t v = 0; v < _g.size(); v++) {
-				if (_rs.isConnected(s, v)) {
-					for (auto& node : _g.adjacent(v)) {
+		void buildMinCutSet_(const G& g, size_t s, const DisjointSet& rs) {
+			for (size_t v = 0; v < g.size(); v++) {
+				if (rs.isConnected(s, v)) {
+					for (auto& node : g.adjacent(v)) {
 						size_t w = node.dest;
-						if (!_rs.isConnected(v, w)) {
-							_minCut.push_back({v, node});
+						if (!rs.isConnected(v, w)) {
+							_minCutSet.push_back({v, node});
 						}
 					}
 				}
@@ -97,16 +131,16 @@ namespace Graph {
 		}
 		
 	public:
-		MinCut_T ( const G& g, const RG& rg, size_t s) : _g(g), _rg(rg), _rs(g.size()) {
-			buildReachabilitySet_(s);
-			buildMinCut_(s);
+		MinCutSet_T ( const G& g, const RG& rg, size_t s) {
+			DisjointSet&& rs = buildReachabilitySet_(rg, s);
+			buildMinCutSet_(g, s, rs);
 		}
 		
-		const std::vector<Edge>& operator()() const { return _minCut; }
+		const std::vector<Edge>& operator()() const { return _minCutSet; }
 	};
 	
 	template <class G, class RG>
-	MinCut_T<G, RG> minCut(const G& g, const RG& rg, size_t s) {
+	MinCutSet_T<G, RG> minCut(const G& g, const RG& rg, size_t s) {
 		return {g, rg, s};
 	}
 
@@ -121,7 +155,6 @@ namespace Graph {
         // Узел списка смежности остаточной сети.
         using ResidualNode = typename ResidualNetwork::NodeType;
         const int MAX = std::numeric_limits<int>::max();
-        ResidualInfo nullInfo = {size_t(-1), 0};
         
         const G& _g;
         std::vector<ResidualInfo> _residualData; // Узлы, ссылки на которые хранятся в остаточной сети.
@@ -134,8 +167,8 @@ namespace Graph {
         int _maxFlow = 0;
 		
 		size_t _s; // исток.
-		using MinCut = MinCut_T<G, ResidualNetwork>;
-		mutable shared_ptr<MinCut> _minCutPtr; // Минимальный разрез.
+		using MinCutSet = MinCutSet_T<G, ResidualNetwork>;
+		mutable shared_ptr<MinCutSet> _minCutPtr; // Минимальный разрез.
         
         // Построение остаточной сети.
         void buildResidualNetwork_(size_t s) {
@@ -176,7 +209,6 @@ namespace Graph {
         // Мы делаем BFS - Стратегия Эдмондса-Карпа.
         bool pfs_(size_t s, size_t t) {
             cout << "bfs step\n";                                               // Debug
-            _st.assign(_g.size(), {size_t(-1), nullInfo});
             std::queue<size_t> q;
             q.push(s);
             vector<bool> visited(_g.size());
@@ -188,31 +220,28 @@ namespace Graph {
                 for(const ResidualNode& n : _rn.adjacent(v)) {
                     ResidualInfo& ri = n.weight;
                     int residualCapacity = ri.residualCapacityTo(n.dest);
-                    ResidualInfo& riDest = _st[n.dest].weight;
-                    // Второе условие исключает зацикливание.
-                    if (residualCapacity > 0 && riDest.isSame(nullInfo)) {
+                    if (!visited[n.dest] && residualCapacity > 0) {
                         cout << v << "-" << n << "|" << residualCapacity << endl; // Debug
                         _st[n.dest] = {v, ri};
                         if (n.dest == t) {
                             return true;
                         }
-                        if (!visited[n.dest]) {
-                            cout << "push " << n.dest << endl;                  // Debug
-                            q.push(n.dest);
-                            visited[n.dest] = true;
-                        } else {
-                            cout << "skip " << n.dest << endl;                   // Debug
-                        }
+                        cout << "push " << n.dest << endl;                  // Debug
+                        q.push(n.dest);
+                        visited[n.dest] = true;
                     }
                 }
             }
             return false;
         }
+        
     public:
         MaxFlowFF_T(const G& g, size_t s, size_t t) : _g(g), _rn(g.size()), _s(s) {
             std::cout << "Ford-Fulkerson\n";                                    // Debug
             buildResidualNetwork_(s);
             std::cout << "Residual network at begin:\n" << _rn;                 // Debug
+            // Заполняем вектор путьи расширения произвольными значениями. Вачно чтобы он был нужного размера.
+            _st.assign(_g.size(), ResidualNode{size_t(-1), _residualData[0]});
             while (pfs_(s, t)) {
                 augment_(s, t);
             }
@@ -222,9 +251,9 @@ namespace Graph {
         int operator()(void) const { return _maxFlow; }
 		
 		// Минимальный разрез из графа G из истока s.
-		const std::vector<typename G::Edge>& minCut() const {
+		const std::vector<typename G::Edge>& minCutSet() const {
 			if (!_minCutPtr) {
-				_minCutPtr = make_shared<MinCut>(_g, _rn, _s);
+				_minCutPtr = make_shared<MinCutSet>(_g, _rn, _s);
 			}
 			return (*_minCutPtr)();
 		}
@@ -235,6 +264,12 @@ namespace Graph {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Проталкивание напора (Preflow-Push). Goldberg Tagjan 1986. O(V^2E)
+    /*
+     Опр. 22.5 Напор (preflow) в транспортных сетях это множество положительных потоков в рёбрах, удовлетворяющих
+     условию: поток в каждом ребре не превышает пропускную способность этого ребра, и приток в каждой внутренней вершине
+     не меньше оттока. Активная вершина - ёто внутренняя вершина, приток в которой больше оттока (по согласованию, исток
+     и сток не могут быть активными).
+     */
     template <class G> class MaxFlowPP_T {
         // В остаточной сети храним ссылки на ResidualInfo потому что прямое и обратное ребро остаточной сети должны быть
 		// одним и тем же объектом ResidualInfo.
@@ -252,8 +287,8 @@ namespace Graph {
         int _maxFlow; // Максимальный поток в сети.
 		
 		size_t _s; // исток.
-		using MinCut = MinCut_T<G, ResidualNetwork>;
-		mutable shared_ptr<MinCut> _minCutPtr; // Минимальный разрез.
+		using MinCutSet = MinCutSet_T<G, ResidualNetwork>;
+		mutable shared_ptr<MinCutSet> _minCutPtr; // Минимальный разрез.
 
         void initHeights_(size_t s, size_t t) {
             // Идем BFS из стока остаточной сети, назначая вершинам расстояния от стока,
@@ -353,9 +388,9 @@ namespace Graph {
         int operator()(void) const { return _maxFlow; }
 		
 		// Минимальный разрез из графа G из истока s.
-		const std::vector<typename G::Edge>& minCut() const {
+		const std::vector<typename G::Edge>& minCutSet() const {
 			if (!_minCutPtr) {
-				_minCutPtr = make_shared<MinCut>(_g, _rn, _s);
+				_minCutPtr = make_shared<MinCutSet>(_g, _rn, _s);
 			}
 			return (*_minCutPtr)();
 		}
@@ -371,8 +406,8 @@ namespace Graph {
     // возможное значение. Итерации завершаем когда на этапе bfs не достигаем стока.
     // http://e-maxx.ru/algo/dinic
     template <class G> class MaxFlowD_T {
-        // В остаточной сети храним ссылки на ResidualInfo потому что прямое и обратное ребро остаточной сети должны быть
-        // одним и тем же объектом ResidualInfo.
+        // В остаточной сети храним ссылки на ResidualInfo потому что прямое и обратное ребро остаточной сети должны
+        // быть одним и тем же объектом ResidualInfo.
         using ResidualInfoRef = std::reference_wrapper<ResidualInfo>;
         // Остаточная сеть неориентированная!
         using ResidualNetwork = SparseGraph_T<WeightedGraphTraits<ResidualInfoRef>>;
@@ -384,13 +419,14 @@ namespace Graph {
         std::vector<size_t> _heights; // Высоты узлов остаточной сети.
         std::vector<ResidualInfo> _residualData; // Узлы, ссылки на которые хранятся в остаточной сети.
         ResidualNetwork _rn; // Остаточная сеть.
-        std::vector<ResidualNetwork::AdjIter::iterator> _next; // для вершины v - вершина _next[v] первого неудаленного инцедентного реьбра остаточной сети.
+        // для вершины v - вершина _next[v] первого неудаленного инцедентного реьбра остаточной сети.
+        std::vector<ResidualNetwork::AdjIter::iterator> _next;
         int _maxFlow; // Максимальный поток в сети.
         
         size_t _s; // исток.
         size_t _t; // сток.
-        using MinCut = MinCut_T<G, ResidualNetwork>;
-        mutable shared_ptr<MinCut> _minCutPtr; // Минимальный разрез.
+        using MinCutSet = MinCutSet_T<G, ResidualNetwork>;
+        mutable shared_ptr<MinCutSet> _minCutPtr; // Минимальный разрез.
         
         // Построение остаточной сети.
         void buildResidualNetwork_() {
@@ -471,9 +507,9 @@ namespace Graph {
         int operator()(void) const { return _maxFlow; }
         
         // Минимальный разрез из графа G из истока s.
-        const std::vector<typename G::Edge>& minCut() const {
+        const std::vector<typename G::Edge>& minCutSet() const {
             if (!_minCutPtr) {
-                _minCutPtr = make_shared<MinCut>(_g, _rn, _s);
+                _minCutPtr = make_shared<MinCutSet>(_g, _rn, _s);
             }
             return (*_minCutPtr)();
         }
