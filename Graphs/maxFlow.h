@@ -40,11 +40,11 @@ namespace Graph {
      минус сумма весов рёбер, соединяющих вершину одного множества с вершиной другого.
      
      Опр. Сечение или разрез (cut) графа есть разбиение множества вершин графа на два непересекающихся подмножества, а
-     перекрестное ребро (crossing edge) - это ребро соединяющее вершину одного подмнодества, с вергиной другого.
+     перекрестное ребро (crossing edge) - это ребро соединяющее вершину одного подмнодества, с вершиной другого.
      
      Опр. 22.3. st-сечение - это сечение, которое помещает вершину s в одно из подмножеств, а вершину t в другое.
      
-     Лемма 22.3. Для любого st-потока поток через произворльное st-сечение равен величине всего потока.
+     Лемма 22.3. Для любого st-потока поток через произвольное st-сечение равен величине всего потока.
      
      Лемма 22.4. Величина st-потока не может превышать пропускной способности любого st-сечения.
      
@@ -68,12 +68,12 @@ namespace Graph {
         bool from_(size_t v) const { return _from == v; }
     public:
         ResidualInfo(size_t from, int capacity):_from(from), _capacity(capacity), _flow(0) {}
-        // Остаточная ёмкость ребра.
-        int residualCapacityTo(size_t v) const { return from_(v) ? _flow : _capacity - _flow; }
-        void addFlowTo(size_t v, int f) { _flow += from_(v) ? -f : +f; }
         
-        // Сравнение по ссылке.
-        bool isSame(const ResidualInfo& ri) const { return this == &ri; }
+        // Остаточная ёмкость ребра ОС применительно к одной из его инцидентных вершин.
+        int residualCapacityTo(size_t v) const { return from_(v) ? _flow : _capacity - _flow; }
+        
+        // Добавить поток из инцидентной ребру ОС вершины.
+        void addFlowTo(size_t v, int f) { _flow += from_(v) ? -f : +f; }
         
         friend std::ostream& operator<< (std::ostream& os, const ResidualInfo& ri) {
             return os << ri._flow << "/" << ri._capacity;
@@ -146,7 +146,7 @@ namespace Graph {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Реализация метода Форда-Фалкерсона поиска максимального потока транспортной сети. O(V^3) достигнуто  О(V^2E).
-    // Для разреженой сети достигнуто V^2lgMlgV, где M - Максимальная пропускная способность рёбер в сети.
+    // Для разреженой сети достигнуто O((V^2)lg(M)lg(V)), где M - Максимальная пропускная способность рёбер в сети.
     template <class G> class MaxFlowFF_T {
         // В остаточной сети храним ссылки на ResidualInfo потому что прямое и обратное ребро остаточной сети должны быть
 		// одним и тем же объектом ResidualInfo.
@@ -171,7 +171,7 @@ namespace Graph {
 		using MinCutSet = MinCutSet_T<G, ResidualNetwork>;
 		mutable shared_ptr<MinCutSet> _minCutPtr; // Минимальный разрез.
         
-        // Построение остаточной сети.
+        // Исходное построение остаточной сети.
         void buildResidualNetwork_(size_t s) {
             _residualData.reserve(_g.edgesCount() * 2); // Чтобы не было перевыделений памяти.
             for ( size_t v = s; v < _g.size(); v++) {
@@ -183,32 +183,13 @@ namespace Graph {
             }
         }
         
-        // Расширение потока. Сначала проходим по пути вычисляя минимальную остаточную емкость.
-        // Потом проходим по пути снова расширяя поток на значение минимальной остаточной емкости.
-        void augment_(size_t s, size_t t) {
-            cout << "augment step\n";                                           // Debug
-            int minResidualFlow = MAX;
-            for(size_t v = t; v != s; v = _st[v]) {
-                ResidualInfo& ri = _st[v].weight;
-                cout << v << "-" << _st[v] << "|";                              // Debug
-                int residualFlow = ri.residualCapacityTo(v);
-                cout << residualFlow << endl;
-                minResidualFlow = std::min(residualFlow, minResidualFlow);
-            }
-            cout << "augment min residual flow: " << minResidualFlow << endl;   // Debug
-            _maxFlow += minResidualFlow;
-            for(size_t v = t; v != s; v = _st[v].dest) {
-                ResidualInfo& ri = _st[v].weight;
-                ri.addFlowTo(v, minResidualFlow);
-            }
-        }
-        
         // Найти путь по которому можно еще увеличить поток транспортной сети.
         // Строит _st. Возможны различные стратегии, например путь с наименьшим числом ребер (BSF) или
         // Путь с приоритетом остаточной емкости (Дейкстра по остаточному весу).
         // Конечный результат от стратегии не изменится.
         // Мы делаем BFS - Стратегия Эдмондса-Карпа.
-        bool pfs_(size_t s, size_t t) {
+        // Возвращает true если по остаточной сети был достигнут сток.
+        bool bfs_(size_t s, size_t t) {
             cout << "bfs step\n";                                               // Debug
             std::queue<size_t> q;
             q.push(s);
@@ -236,14 +217,34 @@ namespace Graph {
             return false;
         }
         
+        // Расширение потока. Сначала проходим по пути вычисляя минимальную остаточную емкость.
+        // Потом проходим по пути снова расширяя поток на значение минимальной остаточной емкости.
+        void augment_(size_t s, size_t t) {
+            cout << "augment step\n";                                           // Debug
+            int minResidualFlow = MAX;
+            for(size_t v = t; v != s; v = _st[v]) {
+                ResidualInfo& ri = _st[v].weight;
+                cout << v << "-" << _st[v] << "|";                              // Debug
+                int residualFlow = ri.residualCapacityTo(v);
+                cout << residualFlow << endl;
+                minResidualFlow = std::min(residualFlow, minResidualFlow);
+            }
+            cout << "augment min residual flow: " << minResidualFlow << endl;   // Debug
+            _maxFlow += minResidualFlow;
+            for(size_t v = t; v != s; v = _st[v].dest) {
+                ResidualInfo& ri = _st[v].weight;
+                ri.addFlowTo(v, minResidualFlow);
+            }
+        }
+        
     public:
         MaxFlowFF_T(const G& g, size_t s, size_t t) : _g(g), _rn(g.size()), _s(s) {
             std::cout << "Ford-Fulkerson\n";                                    // Debug
             buildResidualNetwork_(s);
             std::cout << "Residual network at begin:\n" << _rn;                 // Debug
-            // Заполняем вектор путьи расширения произвольными значениями. Вачно чтобы он был нужного размера.
+            // Заполняем вектор пути расширения произвольными значениями. Вачно чтобы он был нужного размера.
             _st.assign(_g.size(), ResidualNode{size_t(-1), _residualData[0]});
-            while (pfs_(s, t)) {
+            while (bfs_(s, t)) {
                 augment_(s, t);
             }
             std::cout << "Residual network at end:\n" << _rn;                   // Debug
