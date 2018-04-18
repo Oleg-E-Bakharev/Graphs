@@ -76,8 +76,8 @@ public:
 	using reference = vec; // vec это и value_type и reference.
 	using const_reference = const vec;
 	
-	basic_matrix(size_t w, size_t h) : _h(h), _w(w), _m(w * h) {}
-    basic_matrix(size_t w, size_t h, T def) : _h(h), _w(w), _m(w * h, def) {}
+    basic_matrix(size_t h, size_t w) : _h(h), _w(w), _m(w * h) {}
+    basic_matrix(size_t h, size_t w, T def) : _h(h), _w(w), _m(w * h, def) {}
     
     basic_matrix(const basic_matrix&) = default;
 	

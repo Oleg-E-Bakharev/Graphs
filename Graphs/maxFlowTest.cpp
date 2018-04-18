@@ -14,6 +14,7 @@ using namespace Graph;
 
 void maxFlowTest()
 {
+    // Седжвик Рис 22.16
 	SparseGraph_T<WeightedGraphTraits<int>> net(6);
 	insertEdges(net, {
 		{0, 1, 2},
@@ -42,9 +43,8 @@ void maxFlowTest()
     cout << endl;
     
     auto mfD = maxFlowD(net, 0, 5);
-    cout << "Max Flow Dinic: " << mfPP() << "\nMinCut:\n";
+    cout << "Max Flow Dinic: " << mfD() << "\nMinCut:\n";
     for (auto& edge : mfD.minCutSet()) {
         cout << edge << endl;
     }
-
 }

@@ -466,8 +466,7 @@ namespace Graph {
         std::vector<size_t> _heights; // Высоты узлов остаточной сети.
         std::vector<ResidualInfo> _residualData; // Узлы, ссылки на которые хранятся в остаточной сети.
         ResidualNetwork _rn; // Остаточная сеть.
-        // для вершины v - вершина _next[v] первого неудаленного инцедентного реьбра остаточной сети.
-        std::vector<ResidualNetwork::AdjIter::iterator> _next;
+        
         int _maxFlow; // Максимальный поток в сети.
         
         size_t _s; // исток.
@@ -486,7 +485,7 @@ namespace Graph {
                 }
             }
         }
-
+        
         bool bfsHeights_() {
             // Идем BFS из истока остаточной сети, назначая вершинам расстояния от истока,
             // возвращем достижимость стока.
@@ -516,8 +515,7 @@ namespace Graph {
             if (flow == 0 || v == _t) {
                 return flow;
             }
-            for (auto& it = _next[v]; it != _rn.adjacent(v).end(); it++ ) {
-                ResidualNode& node = *it;
+            for (const auto& node : _rn.adjacent(v)) {
                 size_t w = node.dest;
                 // Пропускаем вершины не следующего слоя.
                 if (_heights[w] != _heights[v] + 1) {
@@ -526,6 +524,7 @@ namespace Graph {
                 ResidualInfo& ri = node.weight;
                 int pushed = layeredDfs_(w, min(flow, ri.residualCapacityTo(w)));
                 if (pushed > 0) {
+                    std::cout << "Dinic add flow:" << pushed << " from:" << v << " to:" << w << "\n"; // Debug
                     ri.addFlowTo(w, pushed);
                     return pushed;
                 }
@@ -535,20 +534,19 @@ namespace Graph {
         }
         
     public:
-        MaxFlowD_T( const G& g, size_t s, size_t t ) : _g(g), _next(g.size()), _rn(g.size()), _s(s), _t(t), _maxFlow(0) {
-            // Остаточная сеть.
+        MaxFlowD_T( const G& g, size_t s, size_t t ) : _g(g), _rn(g.size()), _s(s), _t(t), _maxFlow(0) {
+            std::cout << "Dinic\n";
             buildResidualNetwork_();
+            std::cout << "Residual network at begin:\n" << _rn;               // Debug
             // Пока есть t достижим из s.
             while (!bfsHeights_()) {
-                // Инициализация _next;
-                for( size_t v = 0; v < g.size(); v++ ) {
-                    _next[v] = _rn.adjacent(v).begin();
-                }
                 // Заполняем блокирующий поток.
+                std::cout << "Dinic step layed dfs:\n";
                 while(int flow = layeredDfs_(s, MAX)) {
                     _maxFlow += flow;
                 }
             }
+            std::cout << "\nResidual network at end:\n" << _rn;                 // Debug
         }
         
         int operator()(void) const { return _maxFlow; }
