@@ -45,10 +45,17 @@ public:
     
     // Возвращает представителя связного множества - корень дерева связности, реализуя эвристку сжатия пути.
     size_t find(size_t x) const {
-        if ( x == _root[x] ) {
-            return x;
+        size_t root = x;
+        while (_root[root] != root) root = _root[root]; // находим представителя.
+        for (size_t y = x; x != root; x = y) { // сжимаем путь.
+            y = _root[x];
+            _root[x] = root;
         }
-        return _root[x] = find(_root[x]);
+        return root;
+//        if ( x == _root[x] ) {
+//            return x;
+//        }
+//        return _root[x] = find(_root[x]);
     }
     
     // Связывает два связных множества в которых находятся элементы x и y в одно.
