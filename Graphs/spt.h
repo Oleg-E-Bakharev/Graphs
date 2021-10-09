@@ -36,7 +36,9 @@ namespace Graph {
         void pfs_(size_t s) {
             _distance[s] = 0.; // Установим в начальную точку пути нулевой вес.
             // Очередь вершин по приоритету возрастания веса.
-            auto compare = [this](size_t l, size_t r)->bool { return this->_distance[l] > this->_distance[r]; };
+            auto compare = [this](size_t l, size_t r)->bool
+            { return this->_distance[l] > this->_distance[r]; };
+            
             std::priority_queue<size_t, std::vector<size_t>, decltype(compare)> pfsQueue(compare);
             pfsQueue.push(s);
             

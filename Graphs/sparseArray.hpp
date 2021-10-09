@@ -49,7 +49,7 @@ template <typename T> class SparseArray {
         std::vector<bool> _status; // Флаги занятости ячеек _data.
         SparseArray& _owner; // Владелец обёекта.
         
-        using References = std::vector<std::reference_wrapper<Item>> ;
+        using References = std::vector<std::reference_wrapper<Item> > ;
         References _refs;// Cсылки на элементы _data в отсортированном порядке.
         
         bool _fixed = false; // Флаг соотвтствия _data и _refs.

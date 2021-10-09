@@ -36,6 +36,7 @@
 		7C7E4AA320277D9700347B53 /* sparseArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sparseArray.cpp; sourceTree = "<group>"; };
 		7C9B42201E9ADD7100B2D9B1 /* maxFlowTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = maxFlowTest.cpp; sourceTree = "<group>"; };
 		7C9B42211E9ADD7100B2D9B1 /* maxFlow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maxFlow.h; sourceTree = "<group>"; };
+		7C9C96F6222C34B9002B9293 /* hasMember.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hasMember.h; sourceTree = "<group>"; };
 		C30CC58B1CCA75DF003E7B6E /* dag.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dag.h; sourceTree = "<group>"; };
 		C30CC58C1CCBC51A003E7B6E /* strongComponents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = strongComponents.h; sourceTree = "<group>"; };
 		C30CC58D1CCBDF3E003E7B6E /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
@@ -91,6 +92,7 @@
 			children = (
 				7C2B3A19207020DD002A6EBC /* Event.h */,
 				C30CC58D1CCBDF3E003E7B6E /* debug.h */,
+				7C9C96F6222C34B9002B9293 /* hasMember.h */,
 				C34952781CB7BC7600775030 /* for_iter.h */,
 				7C7E4AA220277D9700347B53 /* sparseArray.hpp */,
 				7C7E4AA320277D9700347B53 /* sparseArray.cpp */,
@@ -194,7 +196,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -202,6 +204,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_CXX0X_EXTENSIONS = NO;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -248,7 +251,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -256,6 +259,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_CXX0X_EXTENSIONS = NO;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;

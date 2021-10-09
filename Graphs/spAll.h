@@ -77,24 +77,24 @@ namespace Graph {
         using Edge = typename G::Edge;
         
         const G& _g;
-        std::vector<std::shared_ptr<Spt>> _spAll;
+        std::vector<Spt> _spAll;
         
     public:
         SPAllDijkstra_T( const G& g ) : _g(g) {
             _spAll.reserve(g.size());
             for (size_t v = 0; v < g.size(); v++) {
-                _spAll.push_back(std::make_shared<Spt>(g, v));
+                _spAll.emplace_back(g, v);
             }
         }
         
         // Вес пути между вершинами.
         double distance(size_t v, size_t w) const {
-            return _spAll[v]->distance(w);
+            return _spAll[v].distance(w);
         }
         
         // Кратчайший путь между вершинами.
         std::vector<Edge> path(size_t v, size_t w) const {
-            return _spAll[v]->spt(w);
+            return _spAll[v].spt(w);
         }
         
         friend std::ostream& operator<<(std::ostream& os, const SPAllDijkstra_T& spAll) {
@@ -103,7 +103,7 @@ namespace Graph {
             for (int i = 0; i < spAll._g.size(); i++) {
                 os << i << ": ";
                 for (int j = 0; j < spAll._g.size(); j++) {
-                    double d = spAll._spAll[i]->distance(j);
+                    double d = spAll._spAll[i].distance(j);
                     os << setw(4);
                     if (d != 0.) {
                         os << d;
@@ -118,7 +118,7 @@ namespace Graph {
             for (int i = 0; i < spAll._g.size(); i++) {
                 os << i << ": ";
                 for (int j = 0; j < spAll._g.size(); j++) {
-                     os << setw(2) << (int)spAll._spAll[i]->source(j) << " ";
+                     os << setw(2) << (int)spAll._spAll[i].source(j) << " ";
                 }
                 os << endl;
             }
@@ -191,7 +191,7 @@ namespace Graph {
             Weight wt = 0.;
             while( w != v ) {
                 size_t p = _next[v][w];
-                path.push_back({v, p, Edge(v, p, wt += _weight[v][p])});
+                path.emplace_back(v, p, Edge(v, p, wt += _weight[v][p]));
                 v = p;
             }
             
@@ -209,7 +209,7 @@ namespace Graph {
                     if (d != numeric_limits<double>::max()) {
                         os << d;
                     } else {
-                        os << "";
+                        os << "max";
                     }
                     os << " ";
                 }
@@ -247,6 +247,9 @@ namespace Graph {
 		G& _g;
 		std::shared_ptr<SPAllDijkstra_T<G>> _spAll;
 		
+        // Перевзвешивание графа. Чтобы кратчайшие пути не изменились надо к весу ребра прибавить разницу
+        // весов начальной и конечной вершины. В качестве весов вершин используются кратчайшие расстояния
+        // от истока до этой вершины. Результат: граф без отрицательных весов рёбер.
 		void reweight_(SptBF& bf) {
 			for (size_t v = 0; v < _g.size(); v++) {
 				for( const Node& n : _g.adjacent(v)) {
@@ -287,9 +290,8 @@ namespace Graph {
 			using namespace std;
 			os << "\nSPAllJohnson\n";
 			if (spAll._fail) return os << "Negative cycles detected\n";
-			cout << "Reweighted graph:\n" << spAll._g;
-			cout << *spAll._spAll;
-			return os;
+			os << "Reweighted graph:\n" << spAll._g;
+			return os << *spAll._spAll;
 		}
 	};
 	

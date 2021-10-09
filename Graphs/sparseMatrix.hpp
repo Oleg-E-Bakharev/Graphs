@@ -142,6 +142,7 @@ class basic_matrix<SparseArray<T>, Context> {
     }
     
 public:
+    using context_type = Context;
     using container = SparseArray<T>;
     using vec = basic_slice_iter<container, Context>;
     using value_type = vec;
@@ -183,10 +184,10 @@ public:
     size_t size() const { return _h; }
     
     // Для for(:)
-    for_iter_t<basic_matrix> begin() { return for_iter(*this); }
-    for_iter_t<basic_matrix> end() { return for_iter(*this); }
-    for_iter_t<const basic_matrix> begin() const { return for_iter(*this); }
-    for_iter_t<const basic_matrix> end() const { return for_iter(*this); }
+    auto begin() { return for_iter(*this); }
+    auto end() { return for_iter(*this); }
+    auto begin() const { return for_iter(*this); }
+    auto end() const { return for_iter(*this); }
     
     // Вывод в поток
     friend std::ostream& operator << (std::ostream& os, const basic_matrix<container, Context>& m) {

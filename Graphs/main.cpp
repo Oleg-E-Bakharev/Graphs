@@ -310,7 +310,7 @@ template <class G> void testWeightedGraph(G& g) {
     
     auto prim = mstPrim(g);
     cout << prim;
-    
+
     auto krus = mstKrus(g);
     cout << krus;
 

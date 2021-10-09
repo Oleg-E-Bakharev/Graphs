@@ -9,11 +9,17 @@
 #ifndef for_iter_h
 #define for_iter_h
 
-// Универсальный итератор, который преобразовывает любой random-access-iterable класс в sequence-iterable-class
-// Для использования в range-based for
-// Для использования Collection должен поддерживать [size_t] и size()
-// А также тип reference как ссылка на хранимый тип.
-// Через контекст можно специализировать итератор для специальных целей (напр в матрице смежности графа).
+/**
+ Универсальный итератор, который преобразовывает любой random-access-iterable класс в sequence-iterable класс
+ Для использования в range-based for
+ Для использования T должен поддерживать индексатор [size_t] и метод size()
+ А также тип reference как ссылка на хранимый тип.
+ Применение:
+ В классе-контенере реализовать методы begin() и end() как:
+ auto begin() { return for_iter(*this); }
+ auto end() { return for_iter(*this); }
+ **/
+
 template <typename Collection, typename Context = void, typename Enable = void> class for_iter_t {
     Collection& _col;
     size_t _pos;
@@ -25,7 +31,25 @@ public:
     void operator++() { ++_pos; }
 };
 
+///// Механизм создания различных типов for_iter_t в зависимости от наличия в Collection типа Context
+//template <typename Collection, typename Context = void> struct for_iter_builder {
+//    /// Если в Collection не определён тип Context то будет вызван этот метод.
+//    static inline auto for_iter_build(Collection& col) {
+//        return for_iter_t<Collection, Context>(col);
+//    }
+//};
+//
+//template <typename Collection> struct for_iter_builder<Collection, typename Collection::context_type> {
+//    /// Если в Collection определён тип Context то будет вызван этот метод.
+//    static inline auto for_iter_build(Collection& col) {
+//        return for_iter_t<Collection, typename Collection::context_type>(col);
+//    }
+//};
+//
+//template <typename Collection>
+//inline auto for_iter(Collection& col) { return for_iter_builder<Collection>::for_iter_build(col); }
+
 // Функция для инстанциирования for_iter_t чтобы параметр шаблона вывелся компилятором.
-template<class Collection> for_iter_t<Collection> for_iter(Collection& col) { return for_iter_t<Collection>(col); };
+template<class Collection> auto for_iter(Collection& col) { return for_iter_t<Collection>(col); };
 
 #endif /* for_iter_h */

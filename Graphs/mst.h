@@ -136,7 +136,7 @@ namespace Graph {
             DisjointSet cc(g.size()); // Лес компонент связности.
 			
 			// Накопитель ребер.
-            std::vector<Edge> storage(edges(g));
+            std::vector<Edge> storage(edges(g)); // O(E)
             _mst.reserve(g.size());
 
             // Строим кучу из рёбер.
@@ -166,7 +166,6 @@ namespace Graph {
                 wt += e.weight;
             }
             return os << "MST weight: " << wt << "\n";
-            return os;
         }
     };
     
@@ -177,7 +176,7 @@ namespace Graph {
     // Алгоритм Борувки построения Минимального Остовного Дерева (МОД)
     // Minimal Spanning Tree (MST) Седжвик 20.5 O(E*lg(V))
     /*
-     Изначально, пусть T — пустое множество рёбер (представляющее собой остовный лес, в который каждая вершина входит в
+     Изначально, пусть T — пустое множество рёбер MST (представляющее собой остовный лес, в который каждое ребро входит в
      качестве отдельного дерева).
      Для каждой компоненты связности (то есть, дерева в остовном лесе) в подграфе с рёбрами T, найдём самое дешёвое
      ребро, связывающее эту компоненту с некоторой другой компонентой связности. (Предполагается, что веса рёбер
@@ -196,7 +195,7 @@ namespace Graph {
         MstBoruvka_T(const G& g) : _g(g)
         {
             _mst.reserve(g.size());
-            const std::vector<Edge> edges(::Graph::edges(g));
+            const std::vector<Edge> edges(::Graph::edges(g)); // O(E)
             
             // Индексы рёбер, еще не отвергнутых и не включённых в MST.
             std::vector<size_t> active;
@@ -206,20 +205,20 @@ namespace Graph {
             std::vector<size_t> nearest; // Ближайший сосед к компоненте, указанной индексом.
             DisjointSet cc(g.size()); // Лес компонент связности.
             
-            // lg(E) потому что на каждой следующей итерации |edges| уменьшается вдвое.
+            // O(lg(E)) потому что на каждой следующей итерации |edges| уменьшается вдвое.
             for	(size_t i = active.size(), next = 0; i != 0; i = next) {
                 next = 0;
                 // 1. Строим вектор ближайших соседей.
-                nearest.assign(g.size(), 0);
+                nearest.assign(active.size(), 0);
                 for (size_t j = 0; j < i; j++) {
                     size_t k = active[j]; // индекс текущего ребра.
                     const Edge& e = edges[k];
                     
-                    // Сравниваем
-                    size_t ccV = cc.find(e.v);
+                    // Сравниваем компоненты связности
+                    size_t ccV = cc.find(e.v); // O(1)
                     size_t ccW = cc.find(e.w);
                     if (ccV == ccW) {
-                        continue; // За счёт этого |edges| уменьшается вдвое на каждом шаге.
+                        continue; // За счёт этого |edges| уменьшается вдвое на каждом шаге по i.
                     }
                     if (!nearest[ccV] || e.weight < edges[nearest[ccV]].weight ) nearest[ccV] = k;
                     if (!nearest[ccW] || e.weight < edges[nearest[ccW]].weight ) nearest[ccW] = k;
@@ -227,10 +226,10 @@ namespace Graph {
                 }
                 
                 // 2. Добавляем ближайших соседей в MST.
-                for (size_t j = 0; j < g.size(); j++) {
+                for (size_t j = 0; j < next; j++) {
                     if (nearest[j] != 0) {
                         const Edge& e = edges[nearest[j]];
-                        if (cc.uniteIfNotConnected(e.v, e.w)) {
+                        if (cc.uniteIfNotConnected(e.v, e.w)) { // O(1)
                             _mst.push_back(e);
                         }
                     }

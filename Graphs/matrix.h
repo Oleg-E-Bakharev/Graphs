@@ -26,8 +26,9 @@ template<typename Container, typename Context = void> class basic_slice_iter {
 	slice s;
 	// Вместо T& используем typename vector<T>::reference для совместимости с vector<bool>
 	typename Container::reference ref(size_t i) const { return (v)[s.start() + i * s.stride()]; }
-    friend ForIter;
+//    friend ForIter;
 public:
+    using context_type = Context;
     using value_type = typename Container::value_type;
 	using reference = typename Container::reference;
 	using const_reference = typename Container::const_reference;
@@ -48,7 +49,7 @@ public:
     ForIter end() { return {*this}; }
     ForIter begin() const { return {*this}; }
     ForIter end() const { return {*this}; }
-
+    
     // Вывод в поток
     friend std::ostream& operator << (std::ostream& os, const basic_slice_iter<Container, Context>& v) {
         for (auto x : v ) {
@@ -70,6 +71,7 @@ class basic_matrix {
 	Container _m;
 	
 public:
+    using context_type = Context;
     using T = typename Container::value_type;
 	using vec = basic_slice_iter<Container, Context>;
 	using value_type = vec;
@@ -110,10 +112,10 @@ public:
 	size_t size() const { return _h; }
 	
 	// Для for(:)
-    for_iter_t<basic_matrix> begin() { return for_iter(*this); }
-    for_iter_t<basic_matrix> end() { return for_iter(*this); }
-    for_iter_t<const basic_matrix> begin() const { return for_iter(*this); }
-    for_iter_t<const basic_matrix> end() const { return for_iter(*this); }
+    auto begin() { return for_iter(*this); }
+    auto end() { return for_iter(*this); }
+    auto begin() const { return for_iter(*this); }
+    auto end() const { return for_iter(*this); }
 	
 	// Вывод в поток
 	friend std::ostream& operator << (std::ostream& os, const basic_matrix<Container, Context>& m) {
